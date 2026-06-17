@@ -9,6 +9,7 @@ import { PatientRoutes } from '../routes/PatientRoutes';
 import { DoctorRoutes } from '../routes/DoctorRoutes';
 import { AdminRoutes } from '../routes/AdminRoutes';
 import { SuperAdminRoutes } from '../routes/SuperAdminRoutes';
+
 import { ROLES } from '../constants/roles';
 
 export function AppRouter() {
@@ -19,14 +20,7 @@ export function AppRouter() {
         <Route path="/register" element={<RegisterPage />} />
 
         <Route element={<Layout />}>
-          <Route
-            path="/*"
-            element={
-              <ProtectedRoute allowedRoles={[ROLES.PATIENT]}>
-                <PatientRoutes />
-              </ProtectedRoute>
-            }
-          />
+
           <Route
             path="/doctor/*"
             element={
@@ -35,6 +29,7 @@ export function AppRouter() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/admin/*"
             element={
@@ -43,6 +38,7 @@ export function AppRouter() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/super-admin/*"
             element={
@@ -51,6 +47,16 @@ export function AppRouter() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/*"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.PATIENT]}>
+                <PatientRoutes />
+              </ProtectedRoute>
+            }
+          />
+
         </Route>
       </Routes>
     </BrowserRouter>

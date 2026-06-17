@@ -45,6 +45,57 @@ export function DoctorPatientSummaryPage() {
 
       <PatientContextBanner patientId={patient.patientId} />
 
+      {/* IMPORTANT ACTIONS FIRST */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-blue-700">
+          Patient Actions
+        </p>
+
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Button
+            variant="outline"
+            onClick={() => navigate('/doctor/patients')}
+          >
+            Back to Patients
+          </Button>
+
+          <Button
+            onClick={() =>
+              navigate(
+                `/doctor/patients/${patient.patientId}/timeline`
+              )
+            }
+          >
+            View Timeline
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={() =>
+              navigate(
+                `/doctor/patients/${patient.patientId}/add-event`
+              )
+            }
+          >
+            Add Medical Event
+          </Button>
+
+          <Button
+            onClick={() =>
+              navigate(
+                `/doctor/patients/${patient.patientId}/prescribe`
+              )
+            }
+          >
+            Create Prescription
+          </Button>
+        </div>
+
+        <p className="mt-4 text-sm text-slate-500">
+          These are the most common actions performed during a patient review.
+        </p>
+      </section>
+
       <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <ClinicalSummaryPanel
           title="Clinical Snapshot"
@@ -155,50 +206,12 @@ export function DoctorPatientSummaryPage() {
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-blue-700">
-          Quick Review
+          Notes
         </p>
 
-        <div className="mt-4 flex flex-wrap gap-3">
-          <Button
-            onClick={() =>
-              navigate(
-                `/doctor/patients/${patient.patientId}/timeline`
-              )
-            }
-          >
-            View Timeline
-          </Button>
-
-          <Button
-            variant="outline"
-            onClick={() =>
-              navigate(
-                `/doctor/patients/${patient.patientId}/add-event`
-              )
-            }
-          >
-            Add Medical Event
-          </Button>
-
-          <Button
-            variant="outline"
-            onClick={() =>
-              navigate(
-                `/doctor/patients/${patient.patientId}/prescribe`
-              )
-            }
-          >
-            Create Prescription
-          </Button>
-
-          <Button variant="secondary">
-            Review Follow-up
-          </Button>
-        </div>
-
         <p className="mt-4 text-sm text-slate-500">
-          All content on this page is mocked for the doctor review
-          experience and does not connect to any live services.
+          All content on this page is mocked for the doctor review experience
+          and does not connect to any live services.
         </p>
       </section>
     </div>

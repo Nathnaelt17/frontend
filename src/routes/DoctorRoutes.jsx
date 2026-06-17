@@ -6,23 +6,68 @@ import { DoctorPatientSummaryPage } from '../pages/doctor/DoctorPatientSummaryPa
 import { DoctorPatientTimelinePage } from '../pages/doctor/DoctorPatientTimelinePage';
 import { AddMedicalEventPage } from '../pages/doctor/AddMedicalEventPage';
 import { DoctorAppointmentsPage } from '../pages/doctor/DoctorAppointmentsPage';
+import { CreatePrescriptionPage } from '../pages/doctor/CreatePrescriptionPage';
 import { PagePlaceholder } from '../components/shared/PagePlaceholder';
 
 export function DoctorRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/doctor/dashboard" replace />} />
-      <Route path="/doctor" element={<Navigate to="/doctor/dashboard" replace />} />
-      <Route path="/doctor/dashboard" element={<DoctorDashboardPage />} />
-      <Route path="/doctor/patients" element={<DoctorPatientsPage />} />
-      <Route path="/doctor/patients/:patientId" element={<DoctorPatientSummaryPage />} />
-      <Route path="/doctor/patients/:patientId/timeline" element={<DoctorPatientTimelinePage />} />
-      <Route path="/doctor/patients/:patientId/add-event" element={<AddMedicalEventPage />} />
-      <Route path="/doctor/appointments" element={<DoctorAppointmentsPage />} />
       <Route
-        path="/doctor/prescriptions"
-        element={<PagePlaceholder title="Doctor Prescriptions" section="Doctor Workspace" />}
+        index
+        element={<Navigate to="dashboard" replace />}
+      />
+
+      <Route
+        path="dashboard"
+        element={<DoctorDashboardPage />}
+      />
+
+      <Route
+        path="patients"
+        element={<DoctorPatientsPage />}
+      />
+
+      <Route
+        path="patients/:patientId"
+        element={<DoctorPatientSummaryPage />}
+      />
+
+      <Route
+        path="patients/:patientId/timeline"
+        element={<DoctorPatientTimelinePage />}
+      />
+
+      <Route
+        path="patients/:patientId/add-event"
+        element={<AddMedicalEventPage />}
+      />
+
+      <Route
+        path="patients/:patientId/prescribe"
+        element={<CreatePrescriptionPage />}
+      />
+
+      <Route
+        path="appointments"
+        element={<DoctorAppointmentsPage />}
+      />
+
+      <Route
+        path="prescriptions"
+        element={
+          <PagePlaceholder
+            title="Doctor Prescriptions"
+            section="Doctor Workspace"
+          />
+        }
+      />
+
+      <Route
+        path="*"
+        element={<Navigate to="dashboard" replace />}
       />
     </Routes>
   );
 }
+
+export default DoctorRoutes;
