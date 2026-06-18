@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { addPrescription, PRESCRIPTION_STATUS } from '../../features/patient/prescriptionsStorage';
+import {
+  addPrescription,
+  PRESCRIPTION_STATUS
+} from '../../features/patient/prescriptionsStorage';
+import { addTimelineEvent } from '../../features/timeline/timelineStorage';
 
 export function CreatePrescriptionPage() {
   const navigate = useNavigate();
@@ -12,8 +16,13 @@ export function CreatePrescriptionPage() {
   const [duration, setDuration] = useState('');
   const [instructions, setInstructions] = useState('');
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    setIsSubmitting(true);
 
     addPrescription({
       patientId,
@@ -24,11 +33,62 @@ export function CreatePrescriptionPage() {
       duration,
       instructions,
       prescribedBy: 'Dr. Demo',
-      prescribedDate: new Date().toISOString().split('T')[0],
+      prescribedDate: new Date()
+        .toISOString()
+        .split('T')[0],
       status: PRESCRIPTION_STATUS.ACTIVE
     });
+    addTimelineEvent({
+  type: 'Prescription Issued',
+  occurredAt: new Date().toISOString(),
 
-    navigate('/doctor/patients');
+  title: `${medication} prescription issued`,
+
+  facility: 'Doctor Portal',
+
+  clinician: 'Dr. Demo',
+
+  summary: `${dosage} • ${frequency}`,
+
+  details: [
+    `Medication: ${medication}`,
+    `Dosage: ${dosage}`,
+    `Frequency: ${frequency}`,
+    `Duration: ${duration}`
+  ],
+
+  metadata: [
+    {
+      label: 'Medication',
+      value: medication
+    },
+    {
+      label: 'Dosage',
+      value: dosage
+    },
+    {
+      label: 'Duration',
+      value: duration
+    }
+  ],
+
+  notes: [
+    instructions || 'No additional instructions'
+  ],
+
+  tags: [
+    'Prescription',
+    medication
+  ],
+
+  referenceId: `RX-${Date.now()}`
+});
+
+    setSuccess(true);
+
+    setTimeout(() => {
+      navigate(`/doctor/patients/${patientId}`);
+    }, 1200);
   };
 
   return (
@@ -43,9 +103,21 @@ export function CreatePrescriptionPage() {
         </p>
       </div>
 
+      {success && (
+        <div className="rounded-xl border border-green-200 bg-green-50 p-4">
+          <p className="font-semibold text-green-800">
+            Prescription issued successfully.
+          </p>
+
+          <p className="mt-1 text-sm text-green-700">
+            Returning to patient summary...
+          </p>
+        </div>
+      )}
+
       <form
         onSubmit={handleSubmit}
-        className="rounded-xl border border-slate-200 bg-white p-6 space-y-4"
+        className="space-y-4 rounded-xl border border-slate-200 bg-white p-6"
       >
         <div>
           <label className="mb-2 block font-medium">
@@ -55,7 +127,9 @@ export function CreatePrescriptionPage() {
           <input
             required
             value={medication}
-            onChange={(e) => setMedication(e.target.value)}
+            onChange={(e) =>
+              setMedication(e.target.value)
+            }
             className="w-full rounded-lg border border-slate-200 p-3"
           />
         </div>
@@ -68,7 +142,9 @@ export function CreatePrescriptionPage() {
           <input
             required
             value={dosage}
-            onChange={(e) => setDosage(e.target.value)}
+            onChange={(e) =>
+              setDosage(e.target.value)
+            }
             className="w-full rounded-lg border border-slate-200 p-3"
           />
         </div>
@@ -81,7 +157,9 @@ export function CreatePrescriptionPage() {
           <input
             required
             value={frequency}
-            onChange={(e) => setFrequency(e.target.value)}
+            onChange={(e) =>
+              setFrequency(e.target.value)
+            }
             className="w-full rounded-lg border border-slate-200 p-3"
           />
         </div>
@@ -94,7 +172,9 @@ export function CreatePrescriptionPage() {
           <input
             required
             value={duration}
-            onChange={(e) => setDuration(e.target.value)}
+            onChange={(e) =>
+              setDuration(e.target.value)
+            }
             className="w-full rounded-lg border border-slate-200 p-3"
           />
         </div>
@@ -107,16 +187,21 @@ export function CreatePrescriptionPage() {
           <textarea
             rows={4}
             value={instructions}
-            onChange={(e) => setInstructions(e.target.value)}
+            onChange={(e) =>
+              setInstructions(e.target.value)
+            }
             className="w-full rounded-lg border border-slate-200 p-3"
           />
         </div>
 
         <button
           type="submit"
-          className="w-full rounded-lg bg-blue-600 py-3 text-white hover:bg-blue-700"
+          disabled={isSubmitting}
+          className="w-full rounded-lg bg-blue-600 py-3 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
         >
-          Issue Prescription
+          {isSubmitting
+            ? 'Issuing Prescription...'
+            : 'Issue Prescription'}
         </button>
       </form>
     </div>
