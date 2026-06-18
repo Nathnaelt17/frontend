@@ -14,17 +14,24 @@ const getInitialSession = () => {
 };
 
 const normalizeRole = (role) => {
-  switch (role) {
+  const value = String(role || '').toLowerCase().trim();
+
+  switch (value) {
     case 'doctor':
       return ROLES.DOCTOR;
 
     case 'admin':
+    case 'hospital_admin':
       return ROLES.HOSPITAL_ADMIN;
 
     case 'super_admin':
       return ROLES.SUPER_ADMIN;
 
+    case 'patient':
+      return ROLES.PATIENT;
+
     default:
+      console.warn('Unknown role detected:', role);
       return ROLES.PATIENT;
   }
 };
