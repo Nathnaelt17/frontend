@@ -313,3 +313,5 @@ export function MedicalHistoryPage() {
     </div>
   );
 }
+
+export default MedicalHistoryPage;

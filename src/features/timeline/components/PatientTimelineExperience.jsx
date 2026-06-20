@@ -134,10 +134,12 @@ useEffect(() => {
         </div>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+      {/* Changed: Removed the xl:grid-cols constraint and made it full width */}
+      <section className="w-full">
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-          <div className="relative space-y-5 before:absolute before:left-5 before:top-2 before:h-[calc(100%-1rem)] before:w-px before:bg-slate-200 sm:before:left-6">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 w-full shadow-sm sm:p-6">
+          <div className="relative space-y-5 before:absolute before:left-5 before:top-2 before:h-[calc(100%-1rem)] before:w-px before:bg-slate-200 sm:before:left-6 mx-auto">
+            {/* Changed: Added max-w-4xl mx-auto to control card width centrally */}
 
             {visibleEvents.map((event) => (
               <TimelineEventCard
@@ -161,33 +163,7 @@ useEffect(() => {
             )}
 
           </div>
-        </div>
-
-        <aside className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:sticky xl:top-24 xl:self-start">
-
-          <h3 className="text-sm font-bold uppercase tracking-wide text-slate-500">
-            Timeline Rules
-          </h3>
-
-          <div className="mt-4 space-y-4">
-            {TIMELINE_RULES.map((rule) => (
-              <div
-                key={rule}
-                className="flex gap-3"
-              >
-                <CheckCircle2
-                  className="mt-0.5 shrink-0 text-emerald-600"
-                  size={18}
-                />
-
-                <p className="text-sm leading-6 text-slate-600">
-                  {rule}
-                </p>
-              </div>
-            ))}
-          </div>
-
-        </aside>
+        </div>                              
 
       </section>
 

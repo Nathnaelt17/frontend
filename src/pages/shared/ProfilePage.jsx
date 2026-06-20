@@ -117,20 +117,6 @@ export function ProfilePage() {
 />
         </div>
       </div>
-
-      <div className="bg-white rounded-xl border border-slate-200 p-6">
-        <h2 className="text-xl font-semibold mb-4">
-          Account
-        </h2>
-
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 border border-red-200 text-red-600 px-4 py-2 rounded-lg hover:bg-red-50 transition"
-        >
-          <LogOut size={18} />
-          Logout
-        </button>
-      </div>
     </div>
   );
 }
