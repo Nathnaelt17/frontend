@@ -2,252 +2,270 @@ import {
   Activity,
   Building2,
   CalendarDays,
+  FileText,
   Pill,
-  ShieldCheck,
-  UserRound,
+  AlertTriangle
 } from 'lucide-react';
+
 import { Link } from 'react-router-dom';
 
 import { PatientDashboardWidget } from '../../features/patient/components/PatientDashboardWidget';
+
 import {
-  patientCurrentPrescriptions,
   patientHealthSnapshot,
-  patientLastMedicalEvent,
   patientRecentMedicalActivity,
-  patientUpcomingAppointments,
+  patientUpcomingAppointments
 } from '../../features/patient/mockPatientDashboard';
 
 export function PatientDashboardPage() {
+  const nextAppointment = patientUpcomingAppointments?.[0];
+
+  const vitals = [
+    {
+      label: 'Blood Pressure',
+      value: '118 / 78',
+      status: 'Normal'
+    },
+    {
+      label: 'Blood Sugar',
+      value: '95 mg/dL',
+      status: 'Normal'
+    },
+    {
+      label: 'Weight',
+      value: '72 kg',
+      status: 'Stable'
+    }
+  ];
+
   const quickActions = [
-    { label: 'Find Hospitals', to: '/patient/hospitals', icon: Building2 },
-    { label: 'View Appointments', to: '/patient/appointments', icon: CalendarDays },
-    { label: 'View Timeline', to: '/patient/timeline', icon: Activity },
-    { label: 'View Profile', to: '/patient/profile', icon: UserRound },
+    {
+      label: 'Medical Records',
+      to: '/patient/medicalhistorypage',
+      icon: FileText
+    },
+    {
+      label: 'Appointments',
+      to: '/patient/appointments',
+      icon: CalendarDays
+    },
+    {
+      label: 'Medications',
+      to: '/patient/prescriptions',
+      icon: Pill
+    },
+    {
+      label: 'Hospitals',
+      to: '/patient/hospitals',
+      icon: Building2
+    }
   ];
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <header className="space-y-2">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal-700">
-          Patient Portal
-        </p>
-        <h1 className="text-3xl font-bold text-slate-900">Patient dashboard</h1>
-        <p className="text-slate-600">
-          A mocked overview of your current health status, medications, appointments, and recent activity.
-        </p>
-      </header>
 
-      {/* Top section */}
-      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <PatientDashboardWidget
-          title="Health Snapshot"
-          description="A quick review of your current care status."
-        >
-          <div className="space-y-4">
-            <div className="rounded-2xl border border-gray-100 bg-emerald-50 p-4">
-              <p className="text-sm text-emerald-700">{patientHealthSnapshot.status}</p>
-              <p className="mt-1 text-2xl font-semibold text-slate-900">
-                {patientHealthSnapshot.welcome}
-              </p>
-              <p className="mt-1 text-sm text-slate-500">
-                {patientHealthSnapshot.lastUpdated}
-              </p>
-            </div>
+      {/* HERO */}
+      <section className="rounded-3xl bg-gradient-to-r from-blue-600 to-cyan-600 p-8 text-white shadow-lg">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-sm uppercase tracking-[0.2em] text-teal-100">
+              Patient Portal
+            </p>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              {[].map((item) => (
-                <article
-                  key={item.label}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-                >
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
-                    {item.label}
-                  </p>
-                  <p className="mt-1 text-xl font-semibold text-slate-900">
-                    {item.value}
-                  </p>
-                </article>
-              ))}
-            </div>
+            <h1 className="mt-2 text-3xl font-bold">
+              Good Morning
+            </h1>
 
-            <div>
-              <p className="text-sm font-semibold text-slate-900">Active Conditions</p>
-              <ul className="mt-3 space-y-2 text-sm text-slate-600">
-                {patientHealthSnapshot.activeConditions.map((condition) => (
-                  <li key={condition} className="flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 text-teal-700" />
-                    {condition}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <p className="mt-3 max-w-2xl text-teal-50">
+              Here's your healthcare summary for today.
+              Stay on top of appointments, records,
+              medications and your overall wellness.
+            </p>
           </div>
-        </PatientDashboardWidget>
 
-        {/* Prescriptions */}
-        <PatientDashboardWidget
-          title="Current Prescriptions"
-          description="Medication plan currently shown in the mock patient record."
-        >
-          <div className="space-y-3">
-            {patientCurrentPrescriptions.map((item) => (
-              <article
-                key={item.name}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-base font-semibold text-slate-900">
-                      {item.name}
-                    </p>
-                    <p className="text-sm text-slate-500">{item.schedule}</p>
-                  </div>
-                  <Pill className="h-5 w-5 text-teal-700" />
-                </div>
-                <p className="mt-2 text-sm text-slate-600">{item.note}</p>
-              </article>
-            ))}
-          </div>
-        </PatientDashboardWidget>
+          <Link
+            to="/patient/book-appointment"
+            className="rounded-xl bg-white px-6 py-3 text-center font-semibold text-teal-700 transition hover:bg-slate-100"
+          >
+            Book Appointment
+          </Link>
+        </div>
       </section>
 
-      {/* Middle section */}
-      <section className="grid gap-6 xl:grid-cols-[1fr_0.9fr]">
+      {/* UPCOMING APPOINTMENT */}
+      {nextAppointment && (
         <PatientDashboardWidget
-          title="Current Medications"
-          description="A quick medication overview for your current care plan."
+          title="Upcoming Appointment"
+          description="Your next scheduled healthcare visit."
         >
-          <div className="space-y-3">
-            {patientCurrentPrescriptions.map((item) => (
-              <article
-                key={`${item.name}-med`}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-              >
-                <p className="text-base font-semibold text-slate-900">
-                  {item.name}
+          <div className="rounded-2xl border border-blue-100 bg-blue-50 p-6">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-slate-900">
+                  {nextAppointment.title}
+                </h3>
+
+                <p className="mt-2 text-slate-600">
+                  {nextAppointment.when}
                 </p>
-                <p className="text-sm text-slate-500">{item.schedule}</p>
-                <p className="mt-2 text-sm text-slate-600">{item.note}</p>
-              </article>
-            ))}
+
+                <p className="text-slate-600">
+                  {nextAppointment.location}
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <span className="rounded-full bg-white px-4 py-2 text-center text-sm font-semibold text-blue-700 shadow">
+                  {nextAppointment.status}
+                </span>
+
+                <Link
+                  to="/patient/appointments"
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-center text-white transition hover:bg-blue-700"
+                >
+                  View Details
+                </Link>
+              </div>
+            </div>
           </div>
         </PatientDashboardWidget>
+      )}
 
-        <PatientDashboardWidget
-          title="Upcoming Appointments"
-          description="Mock appointments scheduled for your next care touchpoints."
-        >
-          <div className="space-y-3">
-            {patientUpcomingAppointments.map((appointment) => (
-              <article
-                key={appointment.title}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-base font-semibold text-slate-900">
-                      {appointment.title}
-                    </p>
-                    <p className="mt-1 text-sm text-slate-500">
-                      {appointment.when}
-                    </p>
-                    <p className="text-sm text-slate-500">
-                      {appointment.location}
-                    </p>
-                  </div>
-                  <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-teal-700 shadow-sm">
-                    {appointment.status}
-                  </span>
-                </div>
-              </article>
-            ))}
-          </div>
-        </PatientDashboardWidget>
+      {/* HEALTH SNAPSHOT */}
+      <PatientDashboardWidget
+        title="Health Snapshot"
+        description="Key health indicators at a glance."
+      >
+        <div className="grid gap-4 md:grid-cols-3">
+          {vitals.map((vital) => (
+            <div
+              key={vital.label}
+              className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
+            >
+              <p className="text-sm font-medium text-slate-500">
+                {vital.label}
+              </p>
 
-        <PatientDashboardWidget
-          title="Last Medical Event"
-          description="The most recent event from the existing timeline dataset."
-        >
-          <article className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
-              {patientLastMedicalEvent.type}
-            </p>
-            <h2 className="mt-1 text-xl font-semibold text-slate-900">
-              {patientLastMedicalEvent.title}
-            </h2>
-            <p className="mt-2 text-sm text-slate-600">
-              {patientLastMedicalEvent.summary}
-            </p>
-            <p className="mt-3 text-sm text-slate-500">
-              {patientLastMedicalEvent.facility} · {patientLastMedicalEvent.clinician}
-            </p>
-          </article>
-        </PatientDashboardWidget>
-      </section>
+              <p className="mt-3 text-2xl font-bold text-slate-900">
+                {vital.value}
+              </p>
 
-      {/* Recent activity + actions */}
-      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <PatientDashboardWidget
-          title="Recent Medical Activity"
-          description="A mocked timeline-style view of your recent care activity."
-        >
-          <div className="space-y-3">
-            {patientRecentMedicalActivity.map((event) => (
+              <span className="mt-3 inline-block rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                {vital.status}
+              </span>
+            </div>
+          ))}
+        </div>
+      </PatientDashboardWidget>
+
+      {/* QUICK ACTIONS */}
+      <PatientDashboardWidget
+        title="Quick Actions"
+        description="Access your most-used healthcare tools."
+      >
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {quickActions.map(({ label, to, icon: Icon }) => (
+            <Link
+              key={label}
+              to={to}
+              className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-6 transition hover:border-teal-200 hover:bg-white"
+            >
+              <Icon className="h-8 w-8 text-teal-700" />
+
+              <span className="text-center text-sm font-semibold text-slate-900">
+                {label}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </PatientDashboardWidget>
+
+      {/* RECENT ACTIVITY */}
+      <PatientDashboardWidget
+        title="Recent Activity"
+        description="Your latest healthcare updates."
+      >
+        <div className="space-y-3">
+          {patientRecentMedicalActivity
+            .slice(0, 5)
+            .map((event) => (
               <article
                 key={event.id}
                 className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
               >
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
                       {event.type}
                     </p>
-                    <p className="mt-1 text-sm font-semibold text-slate-900">
+
+                    <p className="mt-1 font-semibold text-slate-900">
                       {event.title}
                     </p>
                   </div>
-                  <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-500 shadow-sm">
-                    {new Date(event.occurredAt).toLocaleDateString()}
+
+                  <span className="rounded-full bg-white px-3 py-1 text-xs text-slate-500 shadow-sm">
+                    {new Date(
+                      event.occurredAt
+                    ).toLocaleDateString()}
                   </span>
                 </div>
-                <p className="mt-2 text-sm text-slate-600">{event.summary}</p>
+
+                <p className="mt-2 text-sm text-slate-600">
+                  {event.summary}
+                </p>
               </article>
             ))}
-          </div>
-        </PatientDashboardWidget>
+        </div>
+      </PatientDashboardWidget>
 
-        <PatientDashboardWidget
-          title="Quick Actions"
-          description="Jump to the existing patient workflow routes."
-        >
-          <div className="grid gap-3">
-            {quickActions.map(({ label, to, icon: Icon }) => (
-              <Link
-                key={label}
-                to={to}
-                className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 p-4
-                 transition hover:border-teal-200 hover:bg-white"
-              >
-                <span className="text-sm font-semibold text-slate-900">
-                  {label}
-                </span>
-                <Icon className="h-4 w-4 text-teal-700" />
-              </Link>
-            ))}
-          </div>
-        </PatientDashboardWidget>
-      </section>
+      {/* HEALTH ALERTS */}
+      <PatientDashboardWidget
+        title="Health Alerts"
+        description="Important reminders and recommendations."
+      >
+        <div className="space-y-3">
+          <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+            <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-600" />
 
-      {/* Footer note */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-blue-700">
-          Mocked patient view
-        </p>
-        <p className="mt-2 text-sm text-slate-500">
-          All dashboard content is mock-only and does not connect to any live services.
-        </p>
-      </section>
+            <div>
+              <p className="font-semibold text-slate-900">
+                Annual Checkup Recommended
+              </p>
+
+              <p className="text-sm text-slate-600">
+                It has been more than 12 months since your
+                last general wellness visit.
+              </p>
+            </div>
+          </div>
+
+          {patientHealthSnapshot?.activeConditions?.length > 0 && (
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="font-semibold text-slate-900">
+                Active Conditions
+              </p>
+
+              <ul className="mt-3 space-y-2 text-sm text-slate-600">
+                {patientHealthSnapshot.activeConditions.map(
+                  (condition) => (
+                    <li
+                      key={condition}
+                      className="flex items-center gap-2"
+                    >
+                      <Activity className="h-4 w-4 text-teal-700" />
+                      {condition}
+                    </li>
+                  )
+                )}
+              </ul>
+            </div>
+          )}
+        </div>
+      </PatientDashboardWidget>
+
     </div>
   );
 }
+
+export default PatientDashboardPage;
