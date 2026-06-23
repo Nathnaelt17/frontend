@@ -1,9 +1,38 @@
-import { Filter } from 'lucide-react';
+import { Filter, ChevronDown } from 'lucide-react';
 import { timelineFilterOptions } from '../data/timelineData';
+
 export function TimelineFilterBar({
   activeType,
   onChange
 }) {
   const options = ['All', ...timelineFilterOptions];
-  return <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:max-w-[520px]"><span className="flex shrink-0 items-center gap-1.5 text-sm font-semibold text-slate-500"><Filter size={16} />Filter</span>{options.map(type => <button type="button" onClick={() => onChange(type)} className={`shrink-0 rounded-full border px-3 py-2 text-sm font-semibold transition-colors ${activeType === type ? 'border-blue-200 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`} key={type}>{type}</button>)}</div>;
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white shadow-sm transition-colors hover:bg-slate-50 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-400/20">
+        <div className="flex items-center gap-1.5 pl-3 text-sm font-semibold text-slate-500">
+          <Filter size={16} />
+          <span className="hidden sm:inline">Filter</span>
+        </div>
+        
+        <div className="relative">
+          <select
+            value={activeType}
+            onChange={(e) => onChange(e.target.value)}
+            className="appearance-none bg-transparent py-2.5 pr-10 pl-1 text-sm font-medium text-slate-700 focus:outline-none"
+          >
+            {options.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+          
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+            <ChevronDown size={16} className="text-slate-400" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

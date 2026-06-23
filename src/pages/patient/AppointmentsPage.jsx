@@ -1,23 +1,55 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  CalendarDays,
+  CheckCircle2,
+  Clock3,
+  XCircle
+} from 'lucide-react';
 
 import { AppointmentCard } from '../../features/patient/components/AppointmentCard';
+
 import {
   APPOINTMENT_STATUS,
-  getAppointments,
+  getAppointments
 } from '../../features/patient/appointmentsStorage';
 
 const FILTERS = [
   { id: 'All', label: 'All' },
   { id: APPOINTMENT_STATUS.PENDING, label: 'Pending' },
   { id: APPOINTMENT_STATUS.CONFIRMED, label: 'Confirmed' },
-  { id: APPOINTMENT_STATUS.REJECTED, label: 'Rejected' },
+  { id: APPOINTMENT_STATUS.REJECTED, label: 'Rejected' }
 ];
 
 export function AppointmentsPage() {
   const appointments = getAppointments();
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
-  const [activeFilter, setActiveFilter] = useState('All');
+
+  const [selectedAppointment, setSelectedAppointment] =
+    useState(null);
+
+  const [activeFilter, setActiveFilter] =
+    useState('All');
+
+  const stats = useMemo(() => {
+    return {
+      total: appointments.length,
+      confirmed: appointments.filter(
+        (a) =>
+          a.status ===
+          APPOINTMENT_STATUS.CONFIRMED
+      ).length,
+      pending: appointments.filter(
+        (a) =>
+          a.status ===
+          APPOINTMENT_STATUS.PENDING
+      ).length,
+      rejected: appointments.filter(
+        (a) =>
+          a.status ===
+          APPOINTMENT_STATUS.REJECTED
+      ).length
+    };
+  }, [appointments]);
 
   const filteredAppointments = useMemo(() => {
     if (activeFilter === 'All') {
@@ -25,127 +57,269 @@ export function AppointmentsPage() {
     }
 
     return appointments.filter(
-      (appointment) => appointment.status === activeFilter
+      (appointment) =>
+        appointment.status === activeFilter
     );
   }, [appointments, activeFilter]);
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Appointments</h1>
 
-          <p className="mt-2 text-slate-600">
-            Manage your appointment requests and review outcomes.
+      {/* HERO */}
+
+      <section className="rounded-3xl bg-gradient-to-r from-blue-600 to-cyan-600 p-8 text-white shadow-lg">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-sm uppercase tracking-[0.2em] text-blue-100">
+              Appointment Center
+            </p>
+
+            <h1 className="mt-2 text-3xl font-bold">
+              Manage Your Care Journey
+            </h1>
+
+            <p className="mt-3 max-w-2xl text-blue-50">
+              Track appointment requests,
+              confirmations, schedules, and
+              upcoming consultations in one place.
+            </p>
+          </div>
+
+          <div className="flex gap-3">
+            <Link
+              to="/patient/hospitals"
+              className="rounded-xl bg-white px-5 py-3 font-semibold text-blue-700 transition hover:bg-slate-100"
+            >
+              Book Appointment
+            </Link>
+            
+          </div>
+        </div>
+      </section>
+
+      {/* STATS */}
+
+      <div className="grid gap-4 md:grid-cols-4">
+        <div className="rounded-2xl border-slate-500 bg-white p-5 shadow-sm">
+          <CalendarDays className="mb-3 text-blue-600" />
+          <p className="text-sm text-slate-500">
+            Total
+          </p>
+          <p className="text-3xl font-bold">
+            {stats.total}
           </p>
         </div>
 
-        <Link
-          to="/patient/hospitals"
-          className="inline-block rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-700"
-        >
-          Book Appointment
-        </Link>
+        <div className="rounded-2xl border-slate-500 bg-white p-5 shadow-sm">
+          <CheckCircle2 className="mb-3 text-green-600" />
+          <p className="text-sm text-slate-500">
+            Confirmed
+          </p>
+          <p className="text-3xl font-bold">
+            {stats.confirmed}
+          </p>
+        </div>
+
+        <div className="rounded-2xl border-slate-500 bg-white p-5 shadow-sm">
+          <Clock3 className="mb-3 text-yellow-600" />
+          <p className="text-sm text-slate-500">
+            Pending
+          </p>
+          <p className="text-3xl font-bold">
+            {stats.pending}
+          </p>
+        </div>
+
+        <div className="rounded-2xl border-slate-500 bg-white p-5 shadow-sm">
+          <XCircle className="mb-3 text-red-600" />
+          <p className="text-sm text-slate-500">
+            Rejected
+          </p>
+          <p className="text-3xl font-bold">
+            {stats.rejected}
+          </p>
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {FILTERS.map((filter) => (
-          <button
-            key={filter.id}
-            type="button"
-            onClick={() => setActiveFilter(filter.id)}
-            className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
-              activeFilter === filter.id
-                ? 'bg-blue-600 text-white'
-                : 'border border-slate-200 bg-white text-slate-700 hover:border-teal-200 hover:bg-teal-50'
-            }`}
-          >
-            {filter.label}
-          </button>
-        ))}
+      {/* FILTERS */}
+
+      <div className="flex flex-wrap gap-3">
+        {FILTERS.map((filter) => {
+          const count =
+            filter.id === 'All'
+              ? stats.total
+              : appointments.filter(
+                  (a) =>
+                    a.status === filter.id
+                ).length;
+
+          return (
+            <button
+              key={filter.id}
+              type="button"
+              onClick={() =>
+                setActiveFilter(filter.id)
+              }
+              className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
+                activeFilter === filter.id
+                  ? 'bg-blue-600 text-white'
+                  : 'border border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50'
+              }`}
+            >
+              {filter.label} ({count})
+            </button>
+          );
+        })}
       </div>
+
+      {/* LIST */}
 
       {filteredAppointments.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-200 bg-white p-10 text-center shadow-sm">
-          <h2 className="text-xl font-semibold text-slate-900">
-            {appointments.length === 0
-              ? 'No appointments yet'
-              : 'No appointments match this filter'}
+        <div className="rounded-3xl border border-dashed border-slate-300 bg-white py-16 text-center">
+          <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-blue-50">
+            <CalendarDays
+              size={36}
+              className="text-blue-600"
+            />
+          </div>
+
+          <h2 className="text-2xl font-bold text-slate-900">
+            No Appointments Found
           </h2>
-          <p className="mt-2 text-slate-600">
-            {appointments.length === 0
-              ? 'Start by choosing a hospital and requesting your first appointment.'
-              : 'Try another filter or book a new appointment.'}
+
+          <p className="mt-3 text-slate-600">
+            Book your first appointment with
+            a healthcare provider.
           </p>
+
           <Link
             to="/patient/hospitals"
-            className="mt-6 inline-block rounded-lg bg-blue-600 px-6 py-3 text-white transition hover:bg-teal-700"
+            className="mt-6 inline-block rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700"
           >
             Book Appointment
           </Link>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {filteredAppointments.map((appointment) => (
-            <AppointmentCard
-              key={appointment.id}
-              appointment={appointment}
-              onViewDetails={setSelectedAppointment}
-            />
-          ))}
+        <div className="grid gap-5 md:grid-cols-2">
+          {filteredAppointments.map(
+            (appointment) => (
+              <AppointmentCard
+                key={appointment.id}
+                appointment={appointment}
+                onViewDetails={
+                  setSelectedAppointment
+                }
+              />
+            )
+          )}
         </div>
       )}
 
-      {selectedAppointment ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
-            <h3 className="text-xl font-bold">Appointment Details</h3>
+      {/* DETAILS DRAWER */}
 
-            <div className="mt-4 space-y-3 text-sm text-slate-700">
-              <p>
-                <strong>Doctor:</strong> {selectedAppointment.doctorName}
-              </p>
+      {selectedAppointment && (
+        <div className="fixed inset-0 z-50 bg-black/40">
+          <div className="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto bg-white shadow-2xl">
+            <div className="p-6">
 
-              <p>
-                <strong>Hospital:</strong>{' '}
-                {selectedAppointment.hospitalName ||
-                  selectedAppointment.hospital}
-              </p>
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold">
+                  Appointment Details
+                </h2>
 
-              <p>
-                <strong>Date:</strong> {selectedAppointment.date}
-              </p>
+                <button
+                  onClick={() =>
+                    setSelectedAppointment(
+                      null
+                    )
+                  }
+                  className="text-slate-500 hover:text-slate-900"
+                >
+                  ✕
+                </button>
+              </div>
 
-              <p>
-                <strong>Time:</strong> {selectedAppointment.time}
-              </p>
+              <div className="mt-6 space-y-5">
 
-              <p>
-                <strong>Reason:</strong> {selectedAppointment.reason}
-              </p>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-400">
+                    Doctor
+                  </p>
 
-              <p>
-                <strong>Status:</strong> {selectedAppointment.status}
-              </p>
+                  <p className="font-semibold">
+                    {
+                      selectedAppointment.doctorName
+                    }
+                  </p>
+                </div>
 
-              {selectedAppointment.createdAt ? (
-                <p>
-                  <strong>Requested:</strong>{' '}
-                  {new Date(selectedAppointment.createdAt).toLocaleString()}
-                </p>
-              ) : null}
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-400">
+                    Hospital
+                  </p>
+
+                  <p>
+                    {selectedAppointment
+                      .hospitalName ||
+                      selectedAppointment.hospital}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-400">
+                    Date & Time
+                  </p>
+
+                  <p>
+                    {selectedAppointment.date}
+                  </p>
+
+                  <p>
+                    {selectedAppointment.time}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-400">
+                    Reason
+                  </p>
+
+                  <p>
+                    {selectedAppointment.reason}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-400">
+                    Status
+                  </p>
+
+                  <p className="font-semibold">
+                    {
+                      selectedAppointment.status
+                    }
+                  </p>
+                </div>
+
+                {selectedAppointment.createdAt && (
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-slate-400">
+                      Requested
+                    </p>
+
+                    <p>
+                      {new Date(
+                        selectedAppointment.createdAt
+                      ).toLocaleString()}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
-
-            <button
-              type="button"
-              onClick={() => setSelectedAppointment(null)}
-              className="mt-6 w-full rounded-lg bg-slate-900 px-4 py-2 text-white"
-            >
-              Close
-            </button>
           </div>
         </div>
-      ) : null}
+      )}
+
     </div>
   );
 }

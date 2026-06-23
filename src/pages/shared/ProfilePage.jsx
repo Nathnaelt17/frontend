@@ -30,7 +30,7 @@ export function ProfilePage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white">
+      <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl p-8 text-white">
         <div className="flex items-center gap-3">
           <User size={32} />
 
@@ -116,20 +116,6 @@ export function ProfilePage() {
   value={medicalData.conditions}
 />
         </div>
-      </div>
-
-      <div className="bg-white rounded-xl border border-slate-200 p-6">
-        <h2 className="text-xl font-semibold mb-4">
-          Account
-        </h2>
-
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 border border-red-200 text-red-600 px-4 py-2 rounded-lg hover:bg-red-50 transition"
-        >
-          <LogOut size={18} />
-          Logout
-        </button>
       </div>
     </div>
   );

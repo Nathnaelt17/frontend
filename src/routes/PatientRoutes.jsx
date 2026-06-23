@@ -7,6 +7,7 @@ import { PrescriptionsPage } from '../pages/patient/PrescriptionsPage';
 import { ProfilePage } from '../pages/shared/ProfilePage';
 import { DoctorsPage } from '../pages/patient/DoctorsPage';
 import { BookAppointmentPage } from '../pages/patient/BookAppointmentPage';
+import {MedicalHistoryPage} from '../pages/patient/MedicalHistoryPage';
 
 export function PatientRoutes() {
   return (
@@ -21,6 +22,7 @@ export function PatientRoutes() {
       <Route path="/patient/hospitals" element={<HospitalsPage />} />
       <Route path="/patient/doctors" element={<DoctorsPage />} />
       <Route path="/patient/book-appointment" element={<BookAppointmentPage />} />
+      <Route path="/patient/medicalhistorypage" element={<MedicalHistoryPage />} /> 
     </Routes>
   );
 }
