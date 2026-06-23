@@ -54,11 +54,6 @@ const navItemsByRole = {
       icon: ClipboardList
     },
     {
-      label: 'Timeline',
-      path: '/patient/timeline',
-      icon: Activity
-    },
-    {
       label: 'Prescriptions',
       path: '/patient/prescriptions',
       icon: Pill
