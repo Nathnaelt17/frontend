@@ -1,4 +1,10 @@
-import { Logo } from './Logo';
-export function LoadingScreen() {
-  return <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 flex items-center justify-center"><div className="text-center"><div className="mb-8 flex justify-center"><div className="animate-pulse"><Logo size={60} /></div></div><p className="text-neutral-600 font-medium">Loading...</p></div></div>;
+import React from 'react';
+
+export function LoadingScreen({ message = "Connecting to TenaLink Pipeline..." }) {
+  return (
+    <div className="flex flex-col justify-center items-center h-64 w-full">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-emerald-100 border-t-cyan-600"></div>
+      <p className="mt-4 text-sm font-medium text-gray-500 animate-pulse">{message}</p>
+    </div>
+  );
 }
