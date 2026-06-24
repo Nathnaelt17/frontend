@@ -7,7 +7,12 @@ import { PrescriptionsPage } from '../pages/patient/PrescriptionsPage';
 import { ProfilePage } from '../pages/shared/ProfilePage';
 import { DoctorsPage } from '../pages/patient/DoctorsPage';
 import { BookAppointmentPage } from '../pages/patient/BookAppointmentPage';
-import {MedicalHistoryPage} from '../pages/patient/MedicalHistoryPage';
+// New nested medical history routing
+import { MedicalHistoryLayout } from '../pages/patient/MedicalHistoryLayout';
+import OverviewPage from '../pages/patient/history/OverviewPage';
+import { PatientTimelineExperience } from '../features/timeline/components/PatientTimelineExperience';
+import LabsPage from '../pages/patient/history/LabsPage';
+import DocumentsPage from '../pages/patient/history/DocumentsPage';
 
 export function PatientRoutes() {
   return (
@@ -22,7 +27,18 @@ export function PatientRoutes() {
       <Route path="/patient/hospitals" element={<HospitalsPage />} />
       <Route path="/patient/doctors" element={<DoctorsPage />} />
       <Route path="/patient/book-appointment" element={<BookAppointmentPage />} />
-      <Route path="/patient/medicalhistorypage" element={<MedicalHistoryPage />} /> 
+      {/* Debug route */}
+      <Route path="/patient/debug" element={<div style={{ padding: '2rem', background: 'yellow', color: 'black' }}>PatientRoutes debug works</div>} />
+
+
+   <Route path="/patient/history/*" element={<MedicalHistoryLayout />}>
+     <Route index element={<OverviewPage />} />
+      <Route path="overview" element={<OverviewPage />} />
+      <Route path="timeline" element={<PatientTimelineExperience view='patient' />} />
+      <Route path="labs" element={<LabsPage />} />
+      <Route path="documents" element={<DocumentsPage />} />
+      <Route path="*" element={<OverviewPage />} />
+   </Route> 
     </Routes>
   );
 }

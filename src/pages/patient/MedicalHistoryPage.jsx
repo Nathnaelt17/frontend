@@ -198,11 +198,10 @@ export function MedicalHistoryPage() {
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              className={`rounded-full px-5 py-2.5 text-sm font-medium transition ${
-                activeTab === t.id
-                  ? 'border-blue-600 text-white shadow-md'
-                  : 'border border-slate-200 bg-blue text-slate-700 hover:border-blue-300 hover:bg-slate-50'
-              }`}
+              className={`rounded-full px-5 py-2.5 text-sm font-medium transition ${activeTab === t.id
+                ? 'border-blue-600 text-white shadow-md'
+                : 'border border-slate-200 bg-blue text-slate-700 hover:border-blue-300 hover:bg-slate-50'
+                }`}
             >
               <Icon size={16} />
               {t.label}
