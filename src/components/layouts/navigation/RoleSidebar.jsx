@@ -50,13 +50,8 @@ const navItemsByRole = {
     },
     {
       label: 'Medical History',
-      path: '/patient/medicalhistorypage',
+      path: '/patient/history',
       icon: ClipboardList
-    },
-    {
-      label: 'Timeline',
-      path: '/patient/timeline',
-      icon: Activity
     },
     {
       label: 'Prescriptions',
