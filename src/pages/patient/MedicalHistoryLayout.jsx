@@ -1,9 +1,10 @@
+// src/pages/patient/MedicalHistoryLayout.jsx
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { User, Activity, FileText, FileStack } from 'lucide-react';
 import TimelineSearchBar from '../../features/timeline/components/TimelineSearchBar';
 import TimelineFilterBar from '../../features/timeline/components/TimelineFilterBar';
-import { TimelineSearchProvider, useTimelineSearch } from '../../context/TimelineSearchContext';
+import { TimelineSearchProvider } from '../../context/TimelineSearchContext';
 
 const tabs = [
   { to: '/patient/history/overview', label: 'Overview', icon: User },
@@ -12,7 +13,7 @@ const tabs = [
   { to: '/patient/history/documents', label: 'Documents', icon: FileStack },
 ];
 
-export function MedicalHistoryLayout() {
+export default function MedicalHistoryLayout() {
   return (
     <TimelineSearchProvider>
       <div className="space-y-6">
@@ -51,7 +52,9 @@ export function MedicalHistoryLayout() {
 
         {/* Shared search and filter */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <TimelineSearchBar />
+          <div className="flex-1">
+            <TimelineSearchBar className="w-full max-w-2xl" placeholder="Search across all tabs..." />
+          </div>
           <TimelineFilterBar />
         </div>
 
@@ -61,3 +64,6 @@ export function MedicalHistoryLayout() {
     </TimelineSearchProvider>
   );
 }
+
+// Named export for compatibility with imports expecting a named export
+export { MedicalHistoryLayout };

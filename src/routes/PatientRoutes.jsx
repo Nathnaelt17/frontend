@@ -8,8 +8,9 @@ import { ProfilePage } from '../pages/shared/ProfilePage';
 import { DoctorsPage } from '../pages/patient/DoctorsPage';
 import { BookAppointmentPage } from '../pages/patient/BookAppointmentPage';
 // New nested medical history routing
-import { MedicalHistoryLayout } from '../pages/patient/MedicalHistoryLayout';
+import { TimelineSearchProvider } from '../context/TimelineSearchContext';
 import OverviewPage from '../pages/patient/history/OverviewPage';
+import { MedicalHistoryLayout } from '../pages/patient/MedicalHistoryLayout';
 import { PatientTimelineExperience } from '../features/timeline/components/PatientTimelineExperience';
 import LabsPage from '../pages/patient/history/LabsPage';
 import DocumentsPage from '../pages/patient/history/DocumentsPage';
@@ -34,7 +35,7 @@ export function PatientRoutes() {
    <Route path="/patient/history/*" element={<MedicalHistoryLayout />}>
      <Route index element={<OverviewPage />} />
       <Route path="overview" element={<OverviewPage />} />
-      <Route path="timeline" element={<PatientTimelineExperience view='patient' />} />
+      <Route path="timeline" element={<PatientTimelineExperience view="patient" />} />
       <Route path="labs" element={<LabsPage />} />
       <Route path="documents" element={<DocumentsPage />} />
       <Route path="*" element={<OverviewPage />} />

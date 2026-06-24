@@ -2,7 +2,9 @@ import React from 'react';
 import { useTimelineSearch } from '../../../context/TimelineSearchContext';
 
 export default function LabsPage() {
-  const { search, activeType } = useTimelineSearch();
+  const { searchTerm, filters } = useTimelineSearch();
+  const activeType = filters?.type || 'All';
+  const search = searchTerm;
   const labs = [
     { id: 1, title: 'CBC', summary: 'Complete blood count results', date: '2023-05-01' },
     { id: 2, title: 'Lipid Panel', summary: 'Cholesterol and triglycerides', date: '2023-06-12' },

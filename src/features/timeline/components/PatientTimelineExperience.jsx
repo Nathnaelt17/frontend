@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useContext } from 'react';
+import React, { useEffect, useMemo, useState, useContext } from 'react';
 import {
   CheckCircle2,
   Lock,
@@ -12,7 +12,7 @@ import {
 import { MedicalEventDetailDrawer } from './MedicalEventDetailDrawer';
 import { TimelineEventCard } from './TimelineEventCard';
 import { getTimelineEvents } from '../timelineStorage';
-import { TimelineSearchContext } from '../../../context/TimelineSearchContext';
+import { useTimelineSearch } from '../../../context/TimelineSearchContext';
 
 const viewCopy = {
   patient: {
@@ -74,7 +74,10 @@ function matchesSearch(event, search) {
 }
 
 export function PatientTimelineExperience({ view }) {
-  const { search, activeType } = useContext(TimelineSearchContext);
+  const { searchTerm, filters, setSearchTerm, setFilters } = useTimelineSearch();
+  const activeType = filters?.type || 'All';
+  const search = searchTerm;
+
 
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [timelineEvents, setTimelineEvents] = useState([]);
