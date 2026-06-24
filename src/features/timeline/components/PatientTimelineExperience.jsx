@@ -131,7 +131,7 @@ export function PatientTimelineExperience({ view }) {
           )}
         </div>
       ) : (
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
+        
           <div className="relative space-y-5 before:absolute before:left-5 before:top-2 before:h-[calc(100%-1rem)] before:w-px before:bg-slate-200 sm:before:left-6">
             {visibleEvents.map((event) => (
               <TimelineEventCard
@@ -142,7 +142,6 @@ export function PatientTimelineExperience({ view }) {
               />
             ))}
           </div>
-        </div>
       )}
 
       {/* Details drawer */}
