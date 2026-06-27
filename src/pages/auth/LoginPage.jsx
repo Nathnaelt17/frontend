@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiAlertCircle } from 'react-icons/fi';
+import { FiAlertCircle, FiEye, FiEyeOff } from 'react-icons/fi';
 
 import { useAuth } from '../../app/providers/AuthContext';
 import { ROLES } from '../../constants/roles';
@@ -15,6 +15,7 @@ export function LoginPage() {
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -118,20 +119,35 @@ export function LoginPage() {
                 Password
               </label>
 
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) =>
-                  setPassword(e.target.value)
-                }
-                placeholder="Enter password"
-                required
-              />
+              <div className="relative">
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) =>
+                    setPassword(e.target.value)
+                  }
+                  placeholder="Enter password"
+                  required
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-700 focus:outline-none"
+                  tabIndex={-1}
+                >
+                  {showPassword ? (
+                    <FiEyeOff size={20} />
+                  ) : (
+                    <FiEye size={20} />
+                  )}
+                </button>
+              </div>
             </div>
 
-            <Button
+            <Button className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               type="submit"
-              className="w-full"
+              
               disabled={loading}
             >
               {loading
@@ -155,20 +171,18 @@ export function LoginPage() {
           <div className="mt-8 border-t pt-6">
             <p className="text-xs text-neutral-500 text-center">
               Demo Accounts
-            </p>
-
-            <div className="mt-3 text-xs text-neutral-600 space-y-1">
+            </p>              <div className="mt-3 text-xs text-neutral-600 space-y-1">
               <div>
-                Patient: patient@test.com / 123456
+                Admin: admin1@tenalink.com / admin123
               </div>
               <div>
-                Doctor: doctor@test.com / 123456
+                Doctor: doctor1@tenalink.com / doctor123
               </div>
               <div>
-                Hospital Admin: admin@test.com / 123456
+                Patient: patient1@tenalink.com / patient123
               </div>
               <div>
-                Super Admin: super@test.com / 123456
+                Super Admin: super@tenalink.com / super123
               </div>
             </div>
           </div>

@@ -7,7 +7,7 @@
   import { AddMedicalEventPage } from '../pages/doctor/AddMedicalEventPage';
   import { DoctorAppointmentsPage } from '../pages/doctor/DoctorAppointmentsPage';
   import { CreatePrescriptionPage } from '../pages/doctor/CreatePrescriptionPage';
-  import { PagePlaceholder } from '../components/shared/PagePlaceholder';
+  import { DoctorPrescriptionsPage } from '../pages/doctor/DoctorPrescriptionsPage';
 
   export function DoctorRoutes() {
     return (
@@ -26,7 +26,7 @@
           path="patients"
           element={<DoctorPatientsPage />}
         />
-
+  
         <Route
           path="patients/:patientId"
           element={<DoctorPatientSummaryPage />}
@@ -54,12 +54,7 @@
 
         <Route
           path="prescriptions"
-          element={
-            <PagePlaceholder
-              title="Doctor Prescriptions"
-              section="Doctor Workspace"
-            />
-          }
+          element={<DoctorPrescriptionsPage />}
         />
 
         <Route

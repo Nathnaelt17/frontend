@@ -2,8 +2,12 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 
 import AuditLogsPage from '../pages/admin/AuditLogsPage';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
+import { AdminDoctorsPage } from '../pages/admin/AdminDoctorsPage';
+import { AdminUsersPage } from '../pages/admin/AdminUsersPage';
+import { AdminPatientsPage } from '../pages/admin/AdminPatientsPage';
+import { AdminAppointmentsPage } from '../pages/admin/AdminAppointmentsPage';
+import { AdminSettingsPage } from '../pages/admin/AdminSettingsPage';
 import { HospitalsPage } from '../pages/shared/HospitalsPage';
-import { PagePlaceholder } from '../components/shared/PagePlaceholder';
 
 export function AdminRoutes() {
   return (
@@ -25,52 +29,27 @@ export function AdminRoutes() {
 
       <Route
         path="doctors"
-        element={
-          <PagePlaceholder
-            title="Admin Doctors"
-            section="Admin Console"
-          />
-        }
+        element={<AdminDoctorsPage />}
       />
 
       <Route
         path="patients"
-        element={
-          <PagePlaceholder
-            title="Admin Patients"
-            section="Admin Console"
-          />
-        }
+        element={<AdminPatientsPage />}
       />
 
       <Route
         path="appointments"
-        element={
-          <PagePlaceholder
-            title="Admin Appointments"
-            section="Admin Console"
-          />
-        }
+        element={<AdminAppointmentsPage />}
       />
 
       <Route
         path="settings"
-        element={
-          <PagePlaceholder
-            title="Admin Settings"
-            section="Admin Console"
-          />
-        }
+        element={<AdminSettingsPage />}
       />
 
       <Route
         path="users"
-        element={
-          <PagePlaceholder
-            title="Admin Users"
-            section="Admin Console"
-          />
-        }
+        element={<AdminUsersPage />}
       />
 
       <Route

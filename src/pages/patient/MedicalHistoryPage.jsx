@@ -2,49 +2,30 @@ import { useEffect, useMemo, useState } from 'react';
 import { FileText, QrCode, Download, Activity, User, FileStack, Search } from 'lucide-react';
 import QRCodeLib from 'qrcode';
 import jsPDF from 'jspdf';
-
-import { patientTimelineEvents } from '../../features/timeline/data/timelineData';
+import ErrorAlert from '../../components/shared/ErrorAlert';
+import { patientApi } from '../../api/patient.api';
+import { getTimelineEvents } from '../../api/timeline.api';
 import { TimelineEventCard } from '../../features/timeline/components/TimelineEventCard';
-import { TimelineFilterBar } from '../../features/timeline/components/TimelineFilterBar';
-
-const demoProfiles = {
-  '123456789012': {
-    full_name: 'Abebe Kebede',
-    fayda_id: '123456789012',
-    blood_type: 'O+',
-    allergies: 'Zinc, Iron supplements',
-    chronic_conditions: 'Hypertension',
-    emergency_contact_name: 'Tigist Kebede',
-    emergency_contact_phone: '+251911234568'
-  },
-  '987654321098': {
-    full_name: 'Selamawit Tesfaye',
-    fayda_id: '987654321098',
-    blood_type: 'AB-',
-    allergies: 'Penicillin, Tree nuts',
-    chronic_conditions: 'Previous Right Arm Fracture (resolved)',
-    emergency_contact_name: 'Yohannes Tesfaye',
-    emergency_contact_phone: '+251922345679'
-  }
-};
+import TimelineFilterBar from '../../features/timeline/components/TimelineFilterBar';
+import { useAuth } from '../../app/providers/AuthContext';
 
 export function MedicalHistoryPage() {
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
-
   const [timelineFilter, setTimelineFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
   const [userProfile, setUserProfile] = useState(null);
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [timelineEvents, setTimelineEvents] = useState([]);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [error, setError] = useState('');
 
-  const storedUser = useMemo(() => {
-    return JSON.parse(localStorage.getItem('currentUser') || 'null');
-  }, []);
+  const { user, patientId } = useAuth();
+  const storedUser = useMemo(() => user || {}, [user]);
 
   const filteredTimeline = useMemo(() => {
-    let events = patientTimelineEvents;
+    let events = timelineEvents;
 
     // TYPE FILTER
     if (timelineFilter !== 'All') {
@@ -65,28 +46,62 @@ export function MedicalHistoryPage() {
     }
 
     return events;
-  }, [timelineFilter, searchQuery]);
+  }, [timelineEvents, timelineFilter, searchQuery]);
 
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);
+        setError('');
 
-        if (!storedUser) return;
+        if (!storedUser?.id) {
+          setError('Missing patient identity. Please sign in again.');
+          setTimelineEvents([]);
+          return;
+        }
 
-        const faydaId =
-          storedUser.fayda_id ||
-          storedUser.email?.split('@')[0] ||
-          'unknown';
+        const profileResponse = await patientApi
+          .getProfile(storedUser.id)
+          .catch(() => null);
 
-        const profile =
-          demoProfiles[faydaId] || {
-            full_name: storedUser.email || 'Patient',
-            fayda_id: faydaId,
-            blood_type: 'N/A'
-          };
+        const profile = {
+          full_name:
+            profileResponse?.full_name ||
+            storedUser.full_name ||
+            storedUser.name ||
+            storedUser.email ||
+            'Patient',
+          fayda_id:
+            storedUser.fayda_id ||
+            storedUser.email?.split('@')[0] ||
+            'unknown',
+          blood_type:
+            profileResponse?.blood_type ||
+            storedUser.blood_type ||
+            'N/A',
+          allergies:
+            profileResponse?.allergies ||
+            storedUser.allergies ||
+            [],
+          chronic_conditions:
+            profileResponse?.chronic_conditions ||
+            storedUser.conditions ||
+            [],
+          emergency_contact_name:
+            profileResponse?.emergency_contact_name ||
+            storedUser.emergency_contact_name ||
+            '',
+          emergency_contact_phone:
+            profileResponse?.emergency_contact_phone ||
+            storedUser.emergency_contact_phone ||
+            ''
+        };
 
         setUserProfile(profile);
+
+        const effectivePatientId = patientId || storedUser.id;
+        const events = await getTimelineEvents(effectivePatientId);
+        setTimelineEvents(Array.isArray(events) ? events : []);
 
         const qrData = JSON.stringify({
           name: profile.full_name,
@@ -100,13 +115,16 @@ export function MedicalHistoryPage() {
 
         const qr = await QRCodeLib.toDataURL(qrData, { width: 250 });
         setQrCodeUrl(qr);
+      } catch (loadError) {
+        setError(loadError?.message || 'Unable to load medical history.');
+        setTimelineEvents([]);
       } finally {
         setLoading(false);
       }
     };
 
     load();
-  }, [storedUser]);
+  }, [patientId, storedUser]);
 
   const downloadPDF = () => {
     const doc = new jsPDF();
@@ -122,7 +140,7 @@ export function MedicalHistoryPage() {
 
     let y = 65;
 
-    patientTimelineEvents.forEach((e, i) => {
+    timelineEvents.forEach((e, i) => {
       doc.setFontSize(10);
       doc.text(`${i + 1}. ${e.title}`, 20, y);
       y += 6;
@@ -153,7 +171,7 @@ export function MedicalHistoryPage() {
     { id: 'documents', label: 'Documents', icon: FileStack }
   ];
 
-  const labResults = patientTimelineEvents.filter(
+  const labResults = timelineEvents.filter(
     e => e.type === 'Lab Result Uploaded'
   );
 

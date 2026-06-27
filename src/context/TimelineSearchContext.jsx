@@ -1,21 +1,37 @@
-import React, { createContext, useState, useContext } from 'react';
+// src/context/TimelineSearchContext.jsx
+import { createContext, useContext, useState } from 'react';
 
-export const TimelineSearchContext = createContext({
-  search: '',
-  setSearch: () => {},
-  activeType: 'All',
-  setActiveType: () => {}
-});
-export default TimelineSearchContext;
+const TimelineSearchContext = createContext();
+
 export const TimelineSearchProvider = ({ children }) => {
-  const [search, setSearch] = useState('');
-  const [activeType, setActiveType] = useState('All');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState({});
+
+  const clearAllFilters = () => {
+    setSearchTerm('');
+    setFilters({});
+  };
 
   return (
-    <TimelineSearchContext.Provider value={{ search, setSearch, activeType, setActiveType }}>
+    <TimelineSearchContext.Provider
+      value={{
+        searchTerm,
+        setSearchTerm,
+        filters,
+        setFilters,
+        clearAllFilters,
+      }}
+    >
       {children}
     </TimelineSearchContext.Provider>
   );
 };
 
-export const useTimelineSearch = () => useContext(TimelineSearchContext);
+// eslint-disable-next-line react-refresh/only-export-components
+export const useTimelineSearch = () => {
+  const ctx = useContext(TimelineSearchContext);
+  if (!ctx) {
+    throw new Error('useTimelineSearch must be used within TimelineSearchProvider');
+  }
+  return ctx;
+};

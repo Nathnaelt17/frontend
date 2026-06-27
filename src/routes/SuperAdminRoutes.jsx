@@ -1,8 +1,10 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 
-import { PagePlaceholder } from '../components/shared/PagePlaceholder';
 import { SuperAdminDashboardPage } from '../pages/super-admin/SuperAdminDashboardPage';
 import { SuperAdminHospitalsPage } from '../pages/super-admin/SuperAdminHospitalsPage';
+import { SuperAdminAuditLogsPage } from '../pages/super-admin/SuperAdminAuditLogsPage';
+import { SuperAdminSystemConfigPage } from '../pages/super-admin/SuperAdminSystemConfigPage';
+import { SuperAdminHospitalAdminsPage } from '../pages/super-admin/SuperAdminHospitalAdminsPage';
 
 export function SuperAdminRoutes() {
   return (
@@ -14,45 +16,28 @@ export function SuperAdminRoutes() {
       />
 
       <Route
-        path="dashboard"                                                                          
+        path="dashboard"
         element={<SuperAdminDashboardPage />}
       />
 
       <Route
         path="hospitals"
-        element={
-        <SuperAdminHospitalsPage />
-        }
+        element={<SuperAdminHospitalsPage />}
       />
 
       <Route
         path="hospital-admins"
-        element={
-          <PagePlaceholder
-            title="Super Admin Hospital Admins"
-            section="Super Admin Console"
-          />
-        }
+        element={<SuperAdminHospitalAdminsPage />}
       />
 
       <Route
         path="audit-logs"
-        element={
-          <PagePlaceholder
-            title="Super Admin Audit Logs"
-            section="Super Admin Console"
-          />
-        }
+        element={<SuperAdminAuditLogsPage />}
       />
 
       <Route
         path="platform"
-        element={
-          <PagePlaceholder
-            title="Super Admin Platform"
-            section="Super Admin Console"
-          />
-        }
+        element={<SuperAdminSystemConfigPage />}
       />
 
       {/* fallback */}

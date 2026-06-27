@@ -1,23 +1,21 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { saveUser } from '../../utils/savedUsers';
+import { authApi } from '../../api/auth.api';
 import { ROLES } from '../../constants/roles';
 
+const AUTH_STORAGE_KEY = 'authState';
 const AuthContext = createContext(null);
 
-const getInitialSession = () => {
-  try {
-    const saved = localStorage.getItem('session');
-    return saved ? JSON.parse(saved) : null;
-  } catch {
-    return null;
-  }
-};
-
 const normalizeRole = (role) => {
-  const value = String(role || '').toLowerCase().trim();
+  let value = String(role || '').toLowerCase().trim();
+
+  if (value.startsWith('role_')) {
+    value = value.substring(5);
+  }
 
   switch (value) {
     case 'doctor':
+    case 'provider':
       return ROLES.DOCTOR;
 
     case 'admin':
@@ -28,113 +26,178 @@ const normalizeRole = (role) => {
       return ROLES.SUPER_ADMIN;
 
     case 'patient':
-      return ROLES.PATIENT;
-
     default:
-      console.warn('Unknown role detected:', role);
       return ROLES.PATIENT;
   }
 };
 
-const normalizeUser = (user) => ({
-  ...user,
-  name:
-    user.full_name ||
-    user.name ||
-    user.email ||
-    user.fayda_id,
-  role: normalizeRole(user.role)
-});
+const getInitialAuthState = () => {
+  try {
+    const saved =
+      localStorage.getItem(AUTH_STORAGE_KEY) ||
+      localStorage.getItem('session');
+    if (!saved) {
+      return null;
+    }
+
+    const parsed = JSON.parse(saved);
+    if (!parsed?.token || !parsed?.userId || !parsed?.role) {
+      return null;
+    }
+
+    return parsed;
+  } catch {
+    return null;
+  }
+};
 
 export function AuthProvider({ children }) {
-  const initialSession = getInitialSession();
+  const initialAuthState = getInitialAuthState();
 
-  const initialUser = initialSession?.user
-    ? normalizeUser(initialSession.user)
-    : null;
+  const [authState, setAuthState] = useState(initialAuthState);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [user, setUser] = useState(initialUser);
+  const persistAuthState = (state) => {
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(state));
+  };
 
-  const [session, setSession] = useState(
-    initialSession
-      ? {
-          ...initialSession,
-          user: initialUser
+  // On mount, if we have a token but no patientId/doctorId, fetch context
+  useEffect(() => {
+    const fetchContext = async () => {
+      if (authState?.token && !authState?.patientId && !authState?.doctorId) {
+        setIsLoading(true);
+        try {
+          const ctx = await authApi.getMe();
+          const updatedState = {
+            ...authState,
+            patientId: ctx.patientId || null,
+            doctorId: ctx.doctorId || null,
+            adminId: ctx.adminId || null,
+          };
+          persistAuthState(updatedState);
+          setAuthState(updatedState);
+        } catch (error) {
+          console.warn('Failed to fetch identity context:', error);
+        } finally {
+          setIsLoading(false);
         }
-      : null
-  );
+      }
+    };
 
-  const [isLoading] = useState(false);
+    fetchContext();
+  }, [authState?.token]);
 
   const signIn = async (identifier, password) => {
+    setIsLoading(true);
+
     try {
-      const users = JSON.parse(
-        localStorage.getItem('users') || '[]'
-      );
+      const trimmedIdentifier = identifier.trim();
 
-      const foundUser = users.find(
-        (u) =>
-          (u.email === identifier ||
-            u.fayda_id === identifier) &&
-          u.password === password
-      );
+      // Step 1: Login
+      const loginResponse = await authApi.login({
+        identifier: trimmedIdentifier,
+        password,
+      });
 
-      if (!foundUser) {
-        return {
-          error: {
-            message:
-              'Invalid email/Fayda ID or password'
-          }
+      // Step 2: Fetch full identity context
+      let patientId = null;
+      let doctorId = null;
+      let adminId = null;
+
+      try {
+        // Temporarily store token so apiClient can use it
+        const tempState = {
+          token: loginResponse.token,
+          userId: loginResponse.userId,
+          role: normalizeRole(loginResponse.role),
         };
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(tempState));
+
+        const ctx = await authApi.getMe();
+        patientId = ctx.patientId || null;
+        doctorId = ctx.doctorId || null;
+        adminId = ctx.adminId || null;
+      } catch (ctxError) {
+        console.warn('Failed to fetch identity context after login:', ctxError);
       }
 
-      const normalizedUser =
-        normalizeUser(foundUser);
+      const normalizedRole = normalizeRole(loginResponse.role);
 
-      const sessionData = {
-        user: normalizedUser,
-        access_token: 'local-session'
+      const newAuthState = {
+        token: loginResponse.token,
+        userId: loginResponse.userId,
+        role: normalizedRole,
+        patientId,
+        doctorId,
+        adminId,
+        email: trimmedIdentifier.includes('@') ? trimmedIdentifier : '',
+        name: '',
       };
 
-      localStorage.setItem(
-        'session',
-        JSON.stringify(sessionData)
-      );
+      persistAuthState(newAuthState);
+      setAuthState(newAuthState);
 
-      setUser(normalizedUser);
-      setSession(sessionData);
-
-      saveUser({
-        id: normalizedUser.id,
-        email: normalizedUser.email,
-        name: normalizedUser.name,
-        faydaId: normalizedUser.fayda_id,
-        lastLogin: new Date().toISOString()
-      });
+      if (newAuthState.email) {
+        saveUser({
+          id: loginResponse.userId,
+          email: newAuthState.email,
+          name: '',
+          faydaId: trimmedIdentifier.includes('@') ? '' : trimmedIdentifier,
+          lastLogin: new Date().toISOString(),
+        });
+      }
 
       return {
         error: null,
-        user: normalizedUser
+        user: {
+          id: loginResponse.userId,
+          role: normalizedRole,
+          patientId,
+          doctorId,
+          adminId,
+        },
       };
     } catch (error) {
       return { error };
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const signOut = async () => {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
     localStorage.removeItem('session');
-    setUser(null);
-    setSession(null);
+    setAuthState(null);
   };
+
+  // Computed user object for backward compatibility
+  const user = authState
+    ? {
+        id: authState.userId || null,
+        role: authState.role || null,
+        patientId: authState.patientId || null,
+        doctorId: authState.doctorId || null,
+        adminId: authState.adminId || null,
+        email: authState.email || '',
+        name: authState.name || '',
+        fayda_id: authState.fayda_id || '',
+      }
+    : null;
 
   return (
     <AuthContext.Provider
       value={{
+        authState,
         user,
-        session,
+        token: authState?.token || null,
+        userId: authState?.userId || null,
+        role: authState?.role || null,
+        patientId: authState?.patientId || null,
+        doctorId: authState?.doctorId || null,
+        adminId: authState?.adminId || null,
         isLoading,
         signIn,
-        signOut
+        signOut,
       }}
     >
       {children}

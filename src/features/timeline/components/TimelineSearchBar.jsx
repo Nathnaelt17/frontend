@@ -1,18 +1,36 @@
-import { Search } from 'lucide-react';
-import { useTimelineSearch } from '../../../context/TimelineSearchContext';
+// src/features/timeline/components/TimelineSearchBar.jsx
 
-export default function TimelineSearchBar() {
-  const { search, setSearch } = useTimelineSearch();
+import { Search } from "lucide-react";
+import { useTimelineSearch } from "../../../context/TimelineSearchContext";
+
+/**
+ * Search bar component.
+ * Props `value` and `onChange` are optional – when omitted the component
+ * syncs with the global TimelineSearchContext.
+ */
+export default function TimelineSearchBar({ value, onChange, placeholder, className }) {
+  const { searchTerm, setSearchTerm } = useTimelineSearch();
+  const inputValue = typeof value === "string" ? value : searchTerm;
+  const handleChange = (e) => {
+    const newVal = e.target.value;
+    if (typeof onChange === "function") {
+      onChange(newVal);
+    }
+    setSearchTerm(newVal);
+  };
+
   return (
-    <label className="flex min-h-11 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-500 focus-within:border-blue-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-50">
-      <Search size={18} />
+    <div className={`relative ${className || ""}`}>
+      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+        <Search className="h-5 w-5 text-gray-400" />
+      </div>
       <input
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-        placeholder="Search by diagnosis, doctor, facility, medicine, lab, or reference ID"
-        className="h-11 min-w-0 flex-1 bg-transparent text-slate-900 outline-none placeholder:text-slate-400"
+        type="text"
+        value={inputValue}
+        onChange={handleChange}
+        className="block w-full max-w-2xl pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+        placeholder={placeholder || "Search…"}
       />
-    </label>
+    </div>
   );
 }
-

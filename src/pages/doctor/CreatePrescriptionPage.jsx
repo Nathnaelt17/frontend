@@ -1,14 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  addPrescription,
-  PRESCRIPTION_STATUS
-} from '../../features/patient/prescriptionsStorage';
-import { addTimelineEvent } from '../../features/timeline/timelineStorage';
+import { useAuth } from '../../app/providers/AuthContext';
+import { createPrescription } from '../../api/prescriptions.api';
 
 export function CreatePrescriptionPage() {
   const navigate = useNavigate();
   const { patientId } = useParams();
+  const { doctorId } = useAuth();
 
   const [medication, setMedication] = useState('');
   const [dosage, setDosage] = useState('');
@@ -18,77 +16,43 @@ export function CreatePrescriptionPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setIsSubmitting(true);
-
-    addPrescription({
-      patientId,
-      patientName: 'Patient',
-      medication,
-      dosage,
-      frequency,
-      duration,
-      instructions,
-      prescribedBy: 'Dr. Demo',
-      prescribedDate: new Date()
-        .toISOString()
-        .split('T')[0],
-      status: PRESCRIPTION_STATUS.ACTIVE
-    });
-    addTimelineEvent({
-  type: 'Prescription Issued',
-  occurredAt: new Date().toISOString(),
-
-  title: `${medication} prescription issued`,
-
-  facility: 'Doctor Portal',
-
-  clinician: 'Dr. Demo',
-
-  summary: `${dosage} • ${frequency}`,
-
-  details: [
-    `Medication: ${medication}`,
-    `Dosage: ${dosage}`,
-    `Frequency: ${frequency}`,
-    `Duration: ${duration}`
-  ],
-
-  metadata: [
-    {
-      label: 'Medication',
-      value: medication
-    },
-    {
-      label: 'Dosage',
-      value: dosage
-    },
-    {
-      label: 'Duration',
-      value: duration
+    if (!patientId) {
+      setSubmitError('Missing patient ID.');
+      return;
     }
-  ],
 
-  notes: [
-    instructions || 'No additional instructions'
-  ],
+    if (!doctorId) {
+      setSubmitError('Missing doctor identity. Please log in again.');
+      return;
+    }
 
-  tags: [
-    'Prescription',
-    medication
-  ],
+    setIsSubmitting(true);
+    setSubmitError('');
 
-  referenceId: `RX-${Date.now()}`
-});
+    try {
+      await createPrescription({
+        patientId,
+        doctorId,
+        medication,
+        dosage,
+        prescribedAt: new Date().toISOString(),
+      });
 
-    setSuccess(true);
+      setSuccess(true);
 
-    setTimeout(() => {
-      navigate(`/doctor/patients/${patientId}`);
-    }, 1200);
+      setTimeout(() => {
+        navigate(`/doctor/patients/${patientId}`);
+      }, 1200);
+    } catch (err) {
+      setSubmitError(err?.message || 'Failed to issue prescription. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -102,6 +66,12 @@ export function CreatePrescriptionPage() {
           Issue a prescription for patient {patientId}.
         </p>
       </div>
+
+      {submitError && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+          <p className="font-semibold text-red-800">{submitError}</p>
+        </div>
+      )}
 
       {success && (
         <div className="rounded-xl border border-green-200 bg-green-50 p-4">
@@ -127,9 +97,7 @@ export function CreatePrescriptionPage() {
           <input
             required
             value={medication}
-            onChange={(e) =>
-              setMedication(e.target.value)
-            }
+            onChange={(e) => setMedication(e.target.value)}
             className="w-full rounded-lg border border-slate-200 p-3"
           />
         </div>
@@ -142,9 +110,7 @@ export function CreatePrescriptionPage() {
           <input
             required
             value={dosage}
-            onChange={(e) =>
-              setDosage(e.target.value)
-            }
+            onChange={(e) => setDosage(e.target.value)}
             className="w-full rounded-lg border border-slate-200 p-3"
           />
         </div>
@@ -155,11 +121,8 @@ export function CreatePrescriptionPage() {
           </label>
 
           <input
-            required
             value={frequency}
-            onChange={(e) =>
-              setFrequency(e.target.value)
-            }
+            onChange={(e) => setFrequency(e.target.value)}
             className="w-full rounded-lg border border-slate-200 p-3"
           />
         </div>
@@ -170,11 +133,8 @@ export function CreatePrescriptionPage() {
           </label>
 
           <input
-            required
             value={duration}
-            onChange={(e) =>
-              setDuration(e.target.value)
-            }
+            onChange={(e) => setDuration(e.target.value)}
             className="w-full rounded-lg border border-slate-200 p-3"
           />
         </div>
@@ -187,9 +147,7 @@ export function CreatePrescriptionPage() {
           <textarea
             rows={4}
             value={instructions}
-            onChange={(e) =>
-              setInstructions(e.target.value)
-            }
+            onChange={(e) => setInstructions(e.target.value)}
             className="w-full rounded-lg border border-slate-200 p-3"
           />
         </div>

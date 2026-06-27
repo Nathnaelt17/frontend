@@ -1,3 +1,4 @@
+// DEAD CODE: This page is not routed and contains legacy mock audit content.
 import { useMemo, useState } from "react";
 
 import AuditFilters from "../../features/Audit/components/AuditFilters";
