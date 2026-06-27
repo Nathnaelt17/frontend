@@ -1,5 +1,5 @@
 // src/features/timeline/components/TimelineSearchBar.jsx
-import React from "react";
+
 import { Search } from "lucide-react";
 import { useTimelineSearch } from "../../../context/TimelineSearchContext";
 

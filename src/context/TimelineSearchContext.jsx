@@ -1,5 +1,5 @@
 // src/context/TimelineSearchContext.jsx
-import React, { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 const TimelineSearchContext = createContext();
 
@@ -27,6 +27,7 @@ export const TimelineSearchProvider = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTimelineSearch = () => {
   const ctx = useContext(TimelineSearchContext);
   if (!ctx) {

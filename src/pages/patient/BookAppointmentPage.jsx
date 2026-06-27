@@ -1,58 +1,127 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-
 import { useAuth } from '../../app/providers/AuthContext';
-import {
-  addAppointment,
-  APPOINTMENT_STATUS,
-} from '../../features/patient/appointmentsStorage';
-import { mockDoctors } from '../../features/patient/mockDoctors';
-import { mockHospitals } from '../../features/patient/mockHospitals';
+import { createAppointment } from '../../api/appointments.api';
+import { getDoctorById } from '../../api/doctors.api';
+import { getHospitalById } from '../../api/hospitals.api';
+import ErrorAlert from '../../components/shared/ErrorAlert';
+
+const APPOINTMENT_STATUS = {
+  PENDING: 'Pending'
+};
 
 export function BookAppointmentPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, patientId } = useAuth();
   const [searchParams] = useSearchParams();
+  const [doctor, setDoctor] = useState(null);
+  const [hospital, setHospital] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const doctorId = searchParams.get('doctor');
   const hospitalId = searchParams.get('hospital');
-
-  const doctor = doctorId
-    ? mockDoctors.find((d) => d.id === doctorId)
-    : null;
-
-  const hospital =
-    hospitalId
-      ? mockHospitals.find((h) => h.id === hospitalId)
-      : doctor
-        ? mockHospitals.find((h) => h.id === doctor.hospitalId)
-        : null;
 
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [reason, setReason] = useState('');
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadBookingData() {
+      try {
+        setLoading(true);
+        setError('');
+
+        if (!doctorId) {
+          setDoctor(null);
+          setHospital(null);
+          return;
+        }
+
+        const [doctorData, hospitalData] = await Promise.all([
+          getDoctorById(doctorId).catch((err) => {
+            throw new Error(err?.message || 'Unable to load selected doctor.');
+          }),
+          hospitalId
+            ? getHospitalById(hospitalId).catch(() => null)
+            : Promise.resolve(null)
+        ]);
+
+        if (mounted) {
+          setDoctor(doctorData);
+          setHospital(hospitalData || null);
+        }
+      } catch (loadError) {
+        if (mounted) {
+          setError(loadError?.message || 'Unable to load booking details.');
+          setDoctor(null);
+          setHospital(null);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadBookingData();
+
+    return () => {
+      mounted = false;
+    };
+  }, [doctorId, hospitalId]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const newAppointment = {
-      id: `APT-${Date.now()}`,
-      patientId: user?.id || 'patient-local',
-      patientName: user?.name || 'Patient',
-      doctorId: doctor.id,
-      doctorName: doctor.name,
-      hospitalId: hospital?.id || doctor.hospitalId,
-      hospitalName: hospital?.name || 'Selected Hospital',
-      date,
-      time,
-      reason,
-      status: APPOINTMENT_STATUS.PENDING,
-      createdAt: new Date().toISOString(),
-    };
+    if (!doctor) {
+      setError('Please select a doctor before submitting your appointment request.');
+      return;
+    }
 
-    addAppointment(newAppointment);
-    navigate('/patient/appointments');
+const newAppointment = {
+  patientId: patientId || user?.id,
+  patientName: user?.name || 'Unknown Patient',
+
+  doctorId: doctor.id,
+  doctorName: doctor.fullName,
+
+  hospitalId: hospital?.uuid || hospital?.id || doctor?.hospitalId,
+  hospitalName: hospital?.name || doctor.hospitalName,
+
+  date,
+  time,
+  reason: reason || 'General consultation'
+};
+if (!date || !time) {
+  setError("Date and time are required");
+  return;
+}
+console.log("APPOINTMENT PAYLOAD:", newAppointment);
+console.log("DOCTOR OBJECT:", doctor);
+console.log("HOSPITAL OBJECT:", hospital);
+
+    try {
+      setLoading(true);
+      setError('');
+      await createAppointment(newAppointment);
+      navigate('/patient/appointments');
+    } catch (submitError) {
+      setError(submitError?.message || 'Unable to submit appointment request.');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (loading && !doctor) {
+    return (
+      <div className="flex justify-center rounded-xl border bg-white py-12">
+        <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-blue-600" />
+      </div>
+    );
+  }
 
   if (!doctor) {
     return (
@@ -101,10 +170,13 @@ export function BookAppointmentPage() {
         </h1>
 
         <p className="mt-2 text-slate-600">
-          {doctor.name} • {doctor.specialty}
+          {doctor?.name || 'Loading doctor...'} •
+          {doctor?.specialty || 'Doctor information'}
           {hospital ? ` • ${hospital.name}` : ''}
         </p>
       </div>
+
+      {error && <ErrorAlert message={error} />}
 
       <form
         onSubmit={handleSubmit}
@@ -172,3 +244,4 @@ export function BookAppointmentPage() {
 }
 
 export default BookAppointmentPage;
+

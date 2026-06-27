@@ -1,23 +1,69 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '../../app/providers/AuthContext';
+import { getAppointmentsByDoctor } from '../../api/appointments.api';
+import ErrorAlert from '../../components/shared/ErrorAlert';
+import EmptyState from '../../components/shared/EmptyState';
+import { CalendarX } from 'lucide-react';
 
-import {
-  APPOINTMENT_STATUS,
-  getPendingAppointments,
-  updateAppointmentStatus,
-} from '../../features/patient/appointmentsStorage';
+const APPOINTMENT_STATUS = {
+  PENDING: 'Pending',
+  CONFIRMED: 'Confirmed',
+  REJECTED: 'Rejected',
+  RESCHEDULE_REQUESTED: 'Reschedule Requested',
+};
 
 export function DoctorAppointmentsPage() {
-  const [pendingAppointments, setPendingAppointments] = useState(() =>
-    getPendingAppointments()
-  );
+  const { doctorId } = useAuth();
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const loadAppointments = () => {
-    setPendingAppointments(getPendingAppointments());
-  };
+  const pendingAppointments = useMemo(() => {
+    return appointments.filter(
+      (appointment) => appointment.status === APPOINTMENT_STATUS.PENDING
+    );
+  }, [appointments]);
 
-  const handleStatusUpdate = (id, status) => {
-    updateAppointmentStatus(id, status);
-    loadAppointments();
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      if (!doctorId) {
+        if (mounted) {
+          setError('Missing doctor identity.');
+          setAppointments([]);
+          setLoading(false);
+        }
+        return;
+      }
+      try {
+        setLoading(true);
+        setError('');
+        const data = await getAppointmentsByDoctor(doctorId);
+        if (mounted) setAppointments(Array.isArray(data) ? data : []);
+      } catch (loadError) {
+        if (mounted) setError(loadError?.message || 'Failed to load appointments.');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [doctorId]);
+
+  const handleStatusUpdate = async (id, status) => {
+    // For now, we can only cancel appointments via the backend API
+    // Status updates would require a backend endpoint for updating appointment status
+    console.warn('Status update not yet implemented for status:', status);
+    // Reload appointments
+    try {
+      setLoading(true);
+      setError('');
+      const data = await getAppointmentsByDoctor(doctorId);
+      setAppointments(Array.isArray(data) ? data : []);
+    } catch (loadError) {
+      setError(loadError?.message || 'Failed to reload appointments.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -32,15 +78,23 @@ export function DoctorAppointmentsPage() {
         </p>
       </header>
 
-      {pendingAppointments.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-200 bg-white p-10 text-center shadow-sm">
-          <h2 className="text-xl font-semibold text-slate-900">
-            No pending requests
-          </h2>
-          <p className="mt-2 text-slate-600">
-            New patient appointment requests will appear here for review.
-          </p>
+      {error && (
+        <ErrorAlert
+          message={error}
+          onRetry={() => window.location.reload()}
+        />
+      )}
+
+      {loading ? (
+        <div className="flex justify-center rounded-xl border bg-white py-12">
+          <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-teal-600" />
         </div>
+      ) : pendingAppointments.length === 0 ? (
+        <EmptyState
+          title="No pending requests"
+          description="New patient appointment requests will appear here for review."
+          icon={CalendarX}
+        />
       ) : (
         <div className="space-y-4">
           {pendingAppointments.map((appointment) => (

@@ -1,5 +1,5 @@
 // src/features/timeline/components/TimelineFilterBar.jsx
-import React from 'react';
+import { useState } from 'react';
 import { Filter, X } from 'lucide-react';
 import { useTimelineSearch } from '../../../context/TimelineSearchContext';
 
@@ -12,11 +12,22 @@ export default function TimelineFilterBar({ filters: propFilters, onFilterChange
   const { filters: ctxFilters, setFilters, clearAllFilters } = useTimelineSearch();
   const filters = propFilters || ctxFilters;
 
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Example filter options – you can extend as needed
+  // Canonical timeline event types
   const filterOptions = [
-    { id: 'type', label: 'Type', options: ['All', 'Medication', 'Procedure', 'Lab', 'Document'] },
+    {
+      id: 'type',
+      label: 'Type',
+      options: [
+        'All',
+        'Visit Created',
+        'Diagnosis Added',
+        'Prescription Issued',
+        'Lab Result Uploaded',
+        'Doctor Note Added',
+      ],
+    },
     { id: 'date', label: 'Date', options: ['All', 'Today', 'This Week', 'This Month', 'This Year'] },
     { id: 'status', label: 'Status', options: ['All', 'Completed', 'Pending', 'Cancelled'] },
   ];

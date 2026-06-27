@@ -1,6 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-  Activity,
   Building2,
   CalendarDays,
   ClipboardList,
@@ -52,11 +51,6 @@ const navItemsByRole = {
       label: 'Medical History',
       path: '/patient/history',
       icon: ClipboardList
-    },
-    {
-      label: 'Prescriptions',
-      path: '/patient/prescriptions',
-      icon: Pill
     },
     {
       label: 'Profile',

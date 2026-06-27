@@ -1,18 +1,61 @@
+import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-
-import { mockDoctors } from '../../features/patient/mockDoctors';
-import { mockHospitals } from '../../features/patient/mockHospitals';
+import { getDoctors } from '../../api/doctors.api';
+import { getHospitalById } from '../../api/hospitals.api';
+import ErrorAlert from '../../components/shared/ErrorAlert';
 
 export function DoctorsPage() {
   const [searchParams] = useSearchParams();
+  const [hospital, setHospital] = useState(null);
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const hospitalId = searchParams.get('hospital');
 
-  const hospital = mockHospitals.find((h) => h.id === hospitalId);
+  useEffect(() => {
+    let mounted = true;
 
-  const doctors = hospitalId
-    ? mockDoctors.filter((doctor) => doctor.hospitalId === hospitalId)
-    : [];
+    async function loadDoctors() {
+      if (!hospitalId) {
+        setHospital(null);
+        setDoctors([]);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError('');
+
+        const [hospitalData, doctorsData] = await Promise.all([
+          getHospitalById(hospitalId),
+          getDoctors(hospitalId)
+        ]);
+
+        if (mounted) {
+          setHospital(hospitalData);
+          setDoctors(Array.isArray(doctorsData) ? doctorsData : []);
+        }
+      } catch (loadError) {
+        if (mounted) {
+          setError(loadError?.message || 'Unable to load doctors.');
+          setHospital(null);
+          setDoctors([]);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadDoctors();
+
+    return () => {
+      mounted = false;
+    };
+  }, [hospitalId]);
 
   return (
     <div className="space-y-8">
@@ -35,13 +78,34 @@ export function DoctorsPage() {
         </p>
       </div>
 
-      {!hospitalId || !hospital ? (
+      {loading ? (
+        <div className="flex justify-center rounded-xl border bg-white py-12">
+          <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-blue-600" />
+        </div>
+      ) : error ? (
+        <ErrorAlert message={error} />
+      ) : !hospitalId ? (
         <div className="rounded-xl border border-dashed border-slate-200 bg-white p-10 text-center shadow-sm">
           <h2 className="text-xl font-semibold text-slate-900">
             No hospital selected
           </h2>
           <p className="mt-2 text-slate-600">
             Choose a hospital before browsing doctors.
+          </p>
+          <Link
+            to="/patient/hospitals"
+            className="mt-6 inline-block rounded-lg bg-teal-600 px-6 py-3 text-white transition hover:bg-teal-700"
+          >
+            Browse Hospitals
+          </Link>
+        </div>
+      ) : !hospital ? (
+        <div className="rounded-xl border border-dashed border-slate-200 bg-white p-10 text-center shadow-sm">
+          <h2 className="text-xl font-semibold text-slate-900">
+            Hospital not found
+          </h2>
+          <p className="mt-2 text-slate-600">
+            The selected hospital could not be loaded.
           </p>
           <Link
             to="/patient/hospitals"
@@ -81,8 +145,7 @@ export function DoctorsPage() {
               </p>
 
               <p className="mt-2 text-sm text-slate-600">
-                Availability: {doctor.availability}
-              </p>
+                Availability: {doctor.availability}</p>
 
               <Link
                 to={`/patient/book-appointment?doctor=${doctor.id}&hospital=${hospitalId}`}

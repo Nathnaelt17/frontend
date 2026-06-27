@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   CalendarDays,
@@ -7,12 +7,16 @@ import {
   XCircle
 } from 'lucide-react';
 
+import ErrorAlert from '../../components/shared/ErrorAlert';
+import { useAuth } from '../../app/providers/AuthContext';
 import { AppointmentCard } from '../../features/patient/components/AppointmentCard';
+import { getAppointments } from '../../api/appointments.api';
 
-import {
-  APPOINTMENT_STATUS,
-  getAppointments
-} from '../../features/patient/appointmentsStorage';
+const APPOINTMENT_STATUS = {
+  PENDING: 'Pending',
+  CONFIRMED: 'Confirmed',
+  REJECTED: 'Rejected'
+};
 
 const FILTERS = [
   { id: 'All', label: 'All' },
@@ -22,13 +26,50 @@ const FILTERS = [
 ];
 
 export function AppointmentsPage() {
-  const appointments = getAppointments();
+  const { patientId } = useAuth();
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('All');
+  const [error, setError] = useState('');
 
-  const [selectedAppointment, setSelectedAppointment] =
-    useState(null);
+  useEffect(() => {
+    let mounted = true;
 
-  const [activeFilter, setActiveFilter] =
-    useState('All');
+    async function loadAppointments() {
+      try {
+        setLoading(true);
+        setError('');
+
+        if (!patientId) {
+          setError('Unable to load appointments. Missing patient profile.');
+          setAppointments([]);
+          return;
+        }
+
+        const data = await getAppointments(patientId);
+
+        if (mounted) {
+          setAppointments(Array.isArray(data) ? data : []);
+        }
+      } catch (loadError) {
+        if (mounted) {
+          setError(loadError?.message || 'Unable to load appointments.');
+          setAppointments([]);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadAppointments();
+
+    return () => {
+      mounted = false;
+    };
+  }, [patientId]);
 
   const stats = useMemo(() => {
     return {
@@ -64,16 +105,10 @@ export function AppointmentsPage() {
 
   return (
     <div className="space-y-8">
-
-      {/* HERO */}
-
       <section className="rounded-3xl bg-gradient-to-r from-blue-600 to-cyan-600 p-8 text-white shadow-lg">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.2em] text-blue-100">
-              Appointment Center
-            </p>
-
+            
             <h1 className="mt-2 text-3xl font-bold">
               Manage Your Care Journey
             </h1>
@@ -92,56 +127,36 @@ export function AppointmentsPage() {
             >
               Book Appointment
             </Link>
-            
           </div>
         </div>
       </section>
 
-      {/* STATS */}
-
+      {error && <ErrorAlert message={error} />}
       <div className="grid gap-4 md:grid-cols-4">
         <div className="rounded-2xl border-slate-500 bg-white p-5 shadow-sm">
           <CalendarDays className="mb-3 text-blue-600" />
-          <p className="text-sm text-slate-500">
-            Total
-          </p>
-          <p className="text-3xl font-bold">
-            {stats.total}
-          </p>
+          <p className="text-sm text-slate-500">Total</p>
+          <p className="text-3xl font-bold">{stats.total}</p>
         </div>
 
         <div className="rounded-2xl border-slate-500 bg-white p-5 shadow-sm">
           <CheckCircle2 className="mb-3 text-green-600" />
-          <p className="text-sm text-slate-500">
-            Confirmed
-          </p>
-          <p className="text-3xl font-bold">
-            {stats.confirmed}
-          </p>
+          <p className="text-sm text-slate-500">Confirmed</p>
+          <p className="text-3xl font-bold">{stats.confirmed}</p>
         </div>
 
         <div className="rounded-2xl border-slate-500 bg-white p-5 shadow-sm">
           <Clock3 className="mb-3 text-yellow-600" />
-          <p className="text-sm text-slate-500">
-            Pending
-          </p>
-          <p className="text-3xl font-bold">
-            {stats.pending}
-          </p>
+          <p className="text-sm text-slate-500">Pending</p>
+          <p className="text-3xl font-bold">{stats.pending}</p>
         </div>
 
         <div className="rounded-2xl border-slate-500 bg-white p-5 shadow-sm">
           <XCircle className="mb-3 text-red-600" />
-          <p className="text-sm text-slate-500">
-            Rejected
-          </p>
-          <p className="text-3xl font-bold">
-            {stats.rejected}
-          </p>
+          <p className="text-sm text-slate-500">Rejected</p>
+          <p className="text-3xl font-bold">{stats.rejected}</p>
         </div>
       </div>
-
-      {/* FILTERS */}
 
       <div className="flex flex-wrap gap-3">
         {FILTERS.map((filter) => {
@@ -172,9 +187,11 @@ export function AppointmentsPage() {
         })}
       </div>
 
-      {/* LIST */}
-
-      {filteredAppointments.length === 0 ? (
+      {loading ? (
+        <div className="flex justify-center rounded-3xl border bg-white py-16">
+          <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-blue-600" />
+        </div>
+      ) : filteredAppointments.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-slate-300 bg-white py-16 text-center">
           <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-blue-50">
             <CalendarDays
@@ -215,13 +232,10 @@ export function AppointmentsPage() {
         </div>
       )}
 
-      {/* DETAILS DRAWER */}
-
       {selectedAppointment && (
         <div className="fixed inset-0 z-50 bg-black/40">
           <div className="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto bg-white shadow-2xl">
             <div className="p-6">
-
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold">
                   Appointment Details
@@ -235,12 +249,11 @@ export function AppointmentsPage() {
                   }
                   className="text-slate-500 hover:text-slate-900"
                 >
-                  ✕
+                  Close
                 </button>
               </div>
 
               <div className="mt-6 space-y-5">
-
                 <div>
                   <p className="text-xs uppercase tracking-wide text-slate-400">
                     Doctor
@@ -270,13 +283,8 @@ export function AppointmentsPage() {
                     Date & Time
                   </p>
 
-                  <p>
-                    {selectedAppointment.date}
-                  </p>
-
-                  <p>
-                    {selectedAppointment.time}
-                  </p>
+                  <p>{selectedAppointment.date}</p>
+                  <p>{selectedAppointment.time}</p>
                 </div>
 
                 <div>
@@ -284,9 +292,7 @@ export function AppointmentsPage() {
                     Reason
                   </p>
 
-                  <p>
-                    {selectedAppointment.reason}
-                  </p>
+                  <p>{selectedAppointment.reason}</p>
                 </div>
 
                 <div>
@@ -295,9 +301,7 @@ export function AppointmentsPage() {
                   </p>
 
                   <p className="font-semibold">
-                    {
-                      selectedAppointment.status
-                    }
+                    {selectedAppointment.status}
                   </p>
                 </div>
 
@@ -319,7 +323,6 @@ export function AppointmentsPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

@@ -1,25 +1,34 @@
-import React from 'react';
+import { AlertCircle, X } from 'lucide-react';
 
-export default function ErrorAlert({ message, onRetry }) {
+export default function ErrorAlert({ message, onRetry, onDismiss }) {
   if (!message) return null;
 
   return (
-    <div className="p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl my-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <div className="flex items-start gap-3">
-        <span className="text-xl" role="img" aria-label="warning">⚠️</span>
-        <div>
-          <h4 className="font-semibold text-sm text-red-900">Pipeline Synchronization Error</h4>
-          <p className="text-xs text-red-700 mt-0.5">{message}</p>
-        </div>
+    <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4" role="alert">
+      <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-red-800">Something went wrong</p>
+        <p className="mt-0.5 text-sm text-red-700">{message}</p>
       </div>
-      {onRetry && (
-        <button 
-          onClick={onRetry} 
-          className="text-xs font-semibold text-red-900 bg-red-100 hover:bg-red-200 px-3 py-1.5 rounded-lg transition-colors shrink-0"
-        >
-          Retry Connection
-        </button>
-      )}
+      <div className="flex shrink-0 items-center gap-2">
+        {onRetry && (
+          <button
+            onClick={onRetry}
+            className="rounded-lg bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-800 transition hover:bg-red-200"
+          >
+            Try again
+          </button>
+        )}
+        {onDismiss && (
+          <button
+            onClick={onDismiss}
+            className="rounded-lg p-1 text-red-400 transition hover:bg-red-100 hover:text-red-600"
+            aria-label="Dismiss"
+          >
+            <X size={16} />
+          </button>
+        )}
+      </div>
     </div>
   );
 }
