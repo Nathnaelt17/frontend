@@ -3,7 +3,9 @@ import { useMemo, useState } from "react";
 
 import AuditFilters from "../../features/Audit/components/AuditFilters";
 import { AuditLogEntryCard } from "../../features/Audit/components/AuditLogCard";
-import { mockAuditLogs } from "../../features/Audit/mockAuditLogs";
+// Removed mock data import
+
+const filteredLogs = []; // Placeholder for future API integration
 
 export default function AuditLogsPage() {
   const [selectedRole, setSelectedRole] =

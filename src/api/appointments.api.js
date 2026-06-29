@@ -23,6 +23,17 @@ export function getAppointmentsByDoctor(doctorId) {
 }
 
 // =========================
+// GET SINGLE APPOINTMENT
+// =========================
+export function getAppointmentById(id) {
+  if (!id) return Promise.resolve(null);
+
+  return apiClient
+    .get(`/appointments/${encodeURIComponent(id)}`)
+    .then((res) => res.data);
+}
+
+// =========================
 // CREATE APPOINTMENT
 // =========================
 export async function createAppointment(data) {
@@ -38,11 +49,29 @@ export async function createAppointment(data) {
 }
 
 // =========================
-// UPDATE APPOINTMENT
+// UPDATE APPOINTMENT (FULL)
 // =========================
 export function updateAppointment(id, data) {
   return apiClient
     .put(`/appointments/${encodeURIComponent(id)}`, data)
+    .then((res) => res.data);
+}
+
+// =========================
+// UPDATE APPOINTMENT STATUS (IMPORTANT FIX)
+// =========================
+export function updateAppointmentStatus(id, status) {
+  return apiClient
+    .put(`/appointments/${encodeURIComponent(id)}/status`, { status })
+    .then((res) => res.data);
+}
+
+// =========================
+// DELETE / CANCEL APPOINTMENT (optional but needed)
+// =========================
+export function deleteAppointment(id) {
+  return apiClient
+    .delete(`/appointments/${encodeURIComponent(id)}`)
     .then((res) => res.data);
 }
 
@@ -52,6 +81,9 @@ export function updateAppointment(id, data) {
 export const appointmentsApi = {
   getAll: getAppointments,
   getByDoctor: getAppointmentsByDoctor,
+  getById: getAppointmentById,
   create: createAppointment,
-  update: updateAppointment
+  update: updateAppointment,
+  updateStatus: updateAppointmentStatus,
+  delete: deleteAppointment,
 };

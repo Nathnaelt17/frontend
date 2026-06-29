@@ -101,7 +101,10 @@ export function MedicalHistoryPage() {
 
         const effectivePatientId = patientId || storedUser.id;
         const events = await getTimelineEvents(effectivePatientId);
-        setTimelineEvents(Array.isArray(events) ? events : []);
+        const sortedEvents = (Array.isArray(events) ? events : []).sort(
+          (a, b) => new Date(b.occurredAt || b.timestamp || 0) - new Date(a.occurredAt || a.timestamp || 0)
+        );
+        setTimelineEvents(sortedEvents);
 
         const qrData = JSON.stringify({
           name: profile.full_name,

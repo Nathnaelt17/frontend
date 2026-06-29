@@ -116,7 +116,12 @@ export function DoctorPatientsPage() {
           })
           .filter(Boolean);
 
-        if (mounted) setPatients(mapped);
+        if (mounted) {
+          const sortedMapped = mapped.sort(
+            (a, b) => new Date(b.lastVisit !== 'N/A' ? b.lastVisit : 0) - new Date(a.lastVisit !== 'N/A' ? a.lastVisit : 0)
+          );
+          setPatients(sortedMapped);
+        }
       } catch (loadError) {
         if (mounted) {
           setError(loadError?.message || 'Failed to load patient list.');

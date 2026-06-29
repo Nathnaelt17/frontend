@@ -74,16 +74,18 @@ export function AddMedicalEventPage() {
     setSubmitError('');
 
     try {
+      const eventData = JSON.stringify({
+        template: selectedTemplate?.label || selectedType,
+        ...formValues,
+      });
+
       await createMedicalEvent({
         patientId,
         authorId: doctorId,
-        hospitalId: null,
+        // hospitalId omitted — nullable on backend
         timestamp: new Date().toISOString(),
         eventType: selectedType,
-        eventData: JSON.stringify({
-          template: selectedTemplate?.label || selectedType,
-          ...formValues,
-        }),
+        eventData: eventData || '{}',
       });
 
       setSubmitted(true);

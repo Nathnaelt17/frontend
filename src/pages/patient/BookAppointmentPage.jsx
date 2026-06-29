@@ -81,27 +81,33 @@ export function BookAppointmentPage() {
       return;
     }
 
-const newAppointment = {
-  patientId: patientId || user?.id,
-  patientName: user?.name || 'Unknown Patient',
+    if (!patientId) {
+      setError('Unable to submit: patient profile not loaded. Try logging in again.');
+      return;
+    }
 
-  doctorId: doctor.id,
-  doctorName: doctor.fullName,
+    const resolvedHospitalId = hospital?.id || doctor?.hospitalId;
+    if (!resolvedHospitalId) {
+      setError('Please select a hospital before booking an appointment.');
+      return;
+    }
 
-  hospitalId: hospital?.uuid || hospital?.id || doctor?.hospitalId,
-  hospitalName: hospital?.name || doctor.hospitalName,
+    if (!date || !time) {
+      setError('Date and time are required');
+      return;
+    }
 
-  date,
-  time,
-  reason: reason || 'General consultation'
-};
-if (!date || !time) {
-  setError("Date and time are required");
-  return;
-}
-console.log("APPOINTMENT PAYLOAD:", newAppointment);
-console.log("DOCTOR OBJECT:", doctor);
-console.log("HOSPITAL OBJECT:", hospital);
+    const newAppointment = {
+      patientId,
+      patientName: user?.name || doctor.patientName || 'Patient',
+      doctorId: doctor.id,
+      doctorName: doctor.fullName,
+      hospitalId: resolvedHospitalId,
+      hospitalName: hospital?.name || doctor.hospitalName || '',
+      date,
+      time,
+      reason: reason || 'General consultation',
+    };
 
     try {
       setLoading(true);
@@ -170,8 +176,8 @@ console.log("HOSPITAL OBJECT:", hospital);
         </h1>
 
         <p className="mt-2 text-slate-600">
-          {doctor?.name || 'Loading doctor...'} •
-          {doctor?.specialty || 'Doctor information'}
+          {doctor?.fullName || 'Loading doctor...'} •
+          {doctor?.specialization || 'Doctor information'}
           {hospital ? ` • ${hospital.name}` : ''}
         </p>
       </div>

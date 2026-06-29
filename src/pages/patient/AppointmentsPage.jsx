@@ -50,7 +50,10 @@ export function AppointmentsPage() {
         const data = await getAppointments(patientId);
 
         if (mounted) {
-          setAppointments(Array.isArray(data) ? data : []);
+          const sortedData = (Array.isArray(data) ? data : []).sort(
+            (a, b) => new Date(b.scheduledAt || b.createdAt || 0) - new Date(a.scheduledAt || a.createdAt || 0)
+          );
+          setAppointments(sortedData);
         }
       } catch (loadError) {
         if (mounted) {
@@ -131,32 +134,7 @@ export function AppointmentsPage() {
         </div>
       </section>
 
-      {error && <ErrorAlert message={error} />}
-      <div className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-2xl border-slate-500 bg-white p-5 shadow-sm">
-          <CalendarDays className="mb-3 text-blue-600" />
-          <p className="text-sm text-slate-500">Total</p>
-          <p className="text-3xl font-bold">{stats.total}</p>
-        </div>
-
-        <div className="rounded-2xl border-slate-500 bg-white p-5 shadow-sm">
-          <CheckCircle2 className="mb-3 text-green-600" />
-          <p className="text-sm text-slate-500">Confirmed</p>
-          <p className="text-3xl font-bold">{stats.confirmed}</p>
-        </div>
-
-        <div className="rounded-2xl border-slate-500 bg-white p-5 shadow-sm">
-          <Clock3 className="mb-3 text-yellow-600" />
-          <p className="text-sm text-slate-500">Pending</p>
-          <p className="text-3xl font-bold">{stats.pending}</p>
-        </div>
-
-        <div className="rounded-2xl border-slate-500 bg-white p-5 shadow-sm">
-          <XCircle className="mb-3 text-red-600" />
-          <p className="text-sm text-slate-500">Rejected</p>
-          <p className="text-3xl font-bold">{stats.rejected}</p>
-        </div>
-      </div>
+      
 
       <div className="flex flex-wrap gap-3">
         {FILTERS.map((filter) => {

@@ -35,7 +35,10 @@ export function DoctorsPage() {
 
         if (mounted) {
           setHospital(hospitalData);
-          setDoctors(Array.isArray(doctorsData) ? doctorsData : []);
+          const sortedDoctors = (Array.isArray(doctorsData) ? doctorsData : []).sort(
+            (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+          );
+          setDoctors(sortedDoctors);
         }
       } catch (loadError) {
         if (mounted) {
@@ -136,9 +139,9 @@ export function DoctorsPage() {
               key={doctor.id}
               className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
             >
-              <h2 className="text-lg font-semibold">{doctor.name}</h2>
+              <h2 className="text-lg font-semibold">{doctor.fullName}</h2>
 
-              <p className="mt-2 text-sm text-slate-600">{doctor.specialty}</p>
+              <p className="mt-2 text-sm text-slate-600">{doctor.specialization}</p>
 
               <p className="mt-2 text-sm text-slate-600">
                 Experience: {doctor.experience}

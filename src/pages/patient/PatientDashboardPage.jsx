@@ -46,8 +46,16 @@ export function PatientDashboardPage() {
         ]);
         if (mounted) {
           setProfile(profileData);
-          setAppointments(Array.isArray(appointmentsData) ? appointmentsData : []);
-          setTimelineEvents(Array.isArray(timelineData) ? timelineData : []);
+          setAppointments(
+            (Array.isArray(appointmentsData) ? appointmentsData : []).sort(
+              (a, b) => new Date(b.scheduledAt || b.createdAt || 0) - new Date(a.scheduledAt || a.createdAt || 0)
+            )
+          );
+          setTimelineEvents(
+            (Array.isArray(timelineData) ? timelineData : []).sort(
+              (a, b) => new Date(b.occurredAt || b.timestamp || 0) - new Date(a.occurredAt || a.timestamp || 0)
+            )
+          );
         }
       } catch (loadError) {
         if (mounted) {
@@ -204,8 +212,16 @@ const conditions = useMemo(() => {
                   getTimelineEvents(patientId)
                 ]);
                 setProfile(profileData);
-                setAppointments(Array.isArray(appointmentsData) ? appointmentsData : []);
-                setTimelineEvents(Array.isArray(timelineData) ? timelineData : []);
+                setAppointments(
+                  (Array.isArray(appointmentsData) ? appointmentsData : []).sort(
+                    (a, b) => new Date(b.scheduledAt || b.createdAt || 0) - new Date(a.scheduledAt || a.createdAt || 0)
+                  )
+                );
+                setTimelineEvents(
+                  (Array.isArray(timelineData) ? timelineData : []).sort(
+                    (a, b) => new Date(b.occurredAt || b.timestamp || 0) - new Date(a.occurredAt || a.timestamp || 0)
+                  )
+                );
               } catch (e) {
                 setError(e?.message || 'Unable to load dashboard.');
               } finally {

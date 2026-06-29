@@ -26,7 +26,10 @@ export function DoctorPrescriptionsPage() {
         setLoading(true);
         setError('');
         const response = await apiClient.get(`/prescriptions/doctor/${encodeURIComponent(doctorId)}`);
-        if (mounted) setPrescriptions(Array.isArray(response.data) ? response.data : []);
+        const sortedData = (Array.isArray(response.data) ? response.data : []).sort(
+          (a, b) => new Date(b.prescribedAt || b.createdAt || 0) - new Date(a.prescribedAt || a.createdAt || 0)
+        );
+        if (mounted) setPrescriptions(sortedData);
       } catch (loadError) {
         if (mounted) setError(loadError?.message || 'Failed to load prescriptions.');
       } finally {

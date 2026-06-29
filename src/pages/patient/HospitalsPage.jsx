@@ -19,7 +19,8 @@ export function HospitalsPage() {
         const data = await getHospitals();
 
         if (mounted) {
-          setHospitals(Array.isArray(data?.content) ? data.content : (Array.isArray(data) ? data : []));
+          const hospitalList = Array.isArray(data?.content) ? data.content : (Array.isArray(data) ? data : []);
+          setHospitals(hospitalList.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)));
         }
       } catch (loadError) {
         if (mounted) {
