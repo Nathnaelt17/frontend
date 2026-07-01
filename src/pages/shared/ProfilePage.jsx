@@ -142,7 +142,10 @@ export function ProfilePage() {
         </div>
       )}
 
-      <form onSubmit={handleSave} className="grid gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <form
+        onSubmit={handleSave}
+        className="grid gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+      >
         <div className="grid gap-4 md:grid-cols-2">
           <InputField label="First Name" value={form.firstName} onChange={handleChange('firstName')} />
           <InputField label="Last Name" value={form.lastName} onChange={handleChange('lastName')} />
@@ -158,8 +161,6 @@ export function ProfilePage() {
           <InputField label="Gender" value={form.gender} onChange={handleChange('gender')} />
           <InputField label="Blood Type" value={form.bloodType} onChange={handleChange('bloodType')} />
         </div>
-
-      
       </form>
     </div>
   );
@@ -173,6 +174,7 @@ function InputField({ label, value, onChange, type = 'text' }) {
         type={type}
         value={value}
         onChange={onChange}
+        readOnly
         className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
       />
     </label>

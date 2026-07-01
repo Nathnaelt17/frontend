@@ -106,6 +106,7 @@ export function PatientResultCard({ patient }) {
         </Button>
 
         <Button
+          variant="outline"
           size="sm"
           onClick={() =>
             navigate(`/doctor/patients/${patient.id}/prescribe`)

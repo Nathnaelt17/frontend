@@ -149,7 +149,7 @@ export function DoctorPatientSummaryPage() {
             Back to Patients
           </Button>
 
-          <Button onClick={() => navigate(`/doctor/patients/${patientId}/timeline`)}>
+          <Button variant="outline" onClick={() => navigate(`/doctor/patients/${patientId}/timeline`)}>
             View Timeline
           </Button>
 
@@ -157,7 +157,7 @@ export function DoctorPatientSummaryPage() {
             Add Medical Event
           </Button>
 
-          <Button onClick={() => navigate(`/doctor/patients/${patientId}/prescribe`)}>
+          <Button variant="outline" onClick={() => navigate(`/doctor/patients/${patientId}/prescribe`)}>
             Create Prescription
           </Button>
         </div>

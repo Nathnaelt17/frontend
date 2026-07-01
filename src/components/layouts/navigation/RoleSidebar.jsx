@@ -218,17 +218,7 @@ export function RoleSidebar({
             <LogOut size={18} />
             Logout
           </button>
-
-          <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3">
-            <div className="flex items-center gap-2 text-sm font-bold text-emerald-800">
-              <ClipboardList size={16} />
-              Care Network
-            </div>
-
-            <p className="mt-1 text-xs leading-5 text-emerald-700">
-              Application shell placeholder
-            </p>
-          </div>
+          
         </div>
       </aside>
     </>
